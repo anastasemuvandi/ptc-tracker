@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Institutional palette: deep teal-blue primary, gold accent; AA contrast. */
+@layer base {
+  :root {
+    --background: 210 25% 97%;
+    --foreground: 210 30% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 30% 12%;
+    --primary: 198 82% 23%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 205 30% 90%;
+    --secondary-foreground: 210 30% 15%;
+    --muted: 210 20% 93%;
+    --muted-foreground: 210 12% 36%;
+    --accent: 44 90% 92%;
+    --accent-foreground: 30 60% 18%;
+    --destructive: 0 72% 42%;
+    --destructive-foreground: 0 0% 100%;
+    --warning: 40 96% 50%;
+    --warning-foreground: 30 60% 12%;
+    --success: 145 63% 30%;
+    --success-foreground: 0 0% 100%;
+    --border: 210 18% 85%;
+    --input: 210 18% 78%;
+    --ring: 198 82% 30%;
+  }
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
+  }
+}

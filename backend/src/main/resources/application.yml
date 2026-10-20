@@ -1,0 +1,98 @@
+# PTC Tracker — runtime configuration. Secrets come from the environment
+# (see deploy/.env.example); none are committed.
+server:
+  port: ${PTC_PORT:8080}
+  forward-headers-strategy: native
+  error:
+    include-message: never
+    include-stacktrace: never
+  servlet:
+    encoding:
+      force: true
+
+spring:
+  application:
+    name: ptc-tracker
+  # Runtime role: ptc_app, subject to row-level security.
+  datasource:
+    url: jdbc:postgresql://${PTC_DB_HOST:localhost}:${PTC_DB_PORT:5432}/${PTC_DB_NAME:ptc}
+    username: ${PTC_DB_APP_USER:ptc_app}
+    password: ${PTC_DB_APP_PASSWORD:}
+  # Migrations run as the owning role, which is never used at runtime.
+  flyway:
+    url: ${spring.datasource.url}
+    user: ${PTC_DB_OWNER_USER:ptc_owner}
+    password: ${PTC_DB_OWNER_PASSWORD:}
+    locations: classpath:db/migration
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: always
+    deserialization:
+      fail-on-unknown-properties: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+  quartz:
+    job-store-type: memory
+    scheduler-name: ptc-reminders
+  mail:
+    host: ${PTC_SMTP_HOST:localhost}
+    port: ${PTC_SMTP_PORT:25}
+    username: ${PTC_SMTP_USER:}
+    password: ${PTC_SMTP_PASSWORD:}
+    properties:
+      mail.smtp.starttls.enable: ${PTC_SMTP_STARTTLS:false}
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 10000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+ptc:
+  mail:
+    enabled: ${PTC_MAIL_ENABLED:false}
+    from: ${PTC_MAIL_FROM:ptc-tracker@localhost}
+  push:
+    vapid-public-key: ${PTC_VAPID_PUBLIC_KEY:}
+    vapid-private-key: ${PTC_VAPID_PRIVATE_KEY:}
+    subject: ${PTC_VAPID_SUBJECT:mailto:ptc-tracker@localhost}
+  auth:
+    issuer: ${PTC_AUTH_ISSUER:ptc-tracker}
+    audience: ptc-tracker-api
+    access-token-ttl: 15m
+    refresh-token-ttl: 14d
+    refresh-absolute-ttl: 30d
+    clock-skew: 60s
+    keys-dir: ${PTC_KEYS_DIR:./var/keys}
+    generate-keys-if-missing: ${PTC_GENERATE_KEYS:false}
+    key-rotation-interval: 90d
+    key-overlap: 24h
+    data-key: ${PTC_DATA_KEY:}
+    refresh-cookie-secure: ${PTC_COOKIE_SECURE:true}
+    public-base-url: ${PTC_PUBLIC_BASE_URL:http://localhost:5173}
+    # Runtime role for the auth module (credentials, tokens).
+    datasource:
+      url: ${spring.datasource.url}
+      username: ${PTC_DB_AUTH_USER:ptc_auth}
+      password: ${PTC_DB_AUTH_PASSWORD:}
+
+logging:
+  level:
+    org.hibernate.orm.deprecation: error

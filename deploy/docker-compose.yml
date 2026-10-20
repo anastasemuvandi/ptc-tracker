@@ -1,0 +1,77 @@
+# PTC Tracker — on-premise deployment. All data stays on this host:
+# PostgreSQL volume, signing-key volume, institution SMTP relay.
+#
+#   cp .env.example .env && ./scripts/generate-secrets.sh >> .env   # once
+#   docker compose up -d --build
+name: ptc-tracker
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ptc
+      POSTGRES_USER: ptc_owner
+      POSTGRES_PASSWORD: ${PTC_DB_OWNER_PASSWORD:?set in .env}
+      PTC_DB_APP_PASSWORD: ${PTC_DB_APP_PASSWORD:?set in .env}
+      PTC_DB_AUTH_PASSWORD: ${PTC_DB_AUTH_PASSWORD:?set in .env}
+      TZ: UTC
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ptc_owner -d ptc"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [internal]
+
+  backend:
+    build: ../backend
+    image: ptc-tracker/backend:local
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PTC_DB_HOST: db
+      PTC_DB_NAME: ptc
+      PTC_DB_OWNER_USER: ptc_owner
+      PTC_DB_OWNER_PASSWORD: ${PTC_DB_OWNER_PASSWORD}
+      PTC_DB_APP_PASSWORD: ${PTC_DB_APP_PASSWORD}
+      PTC_DB_AUTH_PASSWORD: ${PTC_DB_AUTH_PASSWORD}
+      PTC_DATA_KEY: ${PTC_DATA_KEY:?set in .env}
+      PTC_GENERATE_KEYS: ${PTC_GENERATE_KEYS:-true}
+      PTC_PUBLIC_BASE_URL: ${PTC_PUBLIC_BASE_URL:?set in .env}
+      PTC_COOKIE_SECURE: ${PTC_COOKIE_SECURE:-true}
+      PTC_AUTH_ISSUER: ${PTC_PUBLIC_BASE_URL}
+      PTC_BOOTSTRAP_ADMIN_EMAIL: ${PTC_BOOTSTRAP_ADMIN_EMAIL:-}
+      PTC_MAIL_ENABLED: ${PTC_MAIL_ENABLED:-false}
+      PTC_MAIL_FROM: ${PTC_MAIL_FROM:-ptc-tracker@localhost}
+      PTC_SMTP_HOST: ${PTC_SMTP_HOST:-}
+      PTC_SMTP_PORT: ${PTC_SMTP_PORT:-25}
+      PTC_SMTP_USER: ${PTC_SMTP_USER:-}
+      PTC_SMTP_PASSWORD: ${PTC_SMTP_PASSWORD:-}
+      PTC_SMTP_STARTTLS: ${PTC_SMTP_STARTTLS:-false}
+      PTC_VAPID_PUBLIC_KEY: ${PTC_VAPID_PUBLIC_KEY:-}
+      PTC_VAPID_PRIVATE_KEY: ${PTC_VAPID_PRIVATE_KEY:-}
+      PTC_VAPID_SUBJECT: ${PTC_VAPID_SUBJECT:-mailto:ptc-tracker@localhost}
+    volumes:
+      - keys:/var/lib/ptc/keys
+    networks: [internal]
+
+  web:
+    build: ../frontend
+    image: ptc-tracker/web:local
+    restart: unless-stopped
+    depends_on: [backend]
+    ports:
+      - "${PTC_HTTP_PORT:-8088}:8080"
+    networks: [internal]
+
+volumes:
+  db-data:
+  keys:
+
+networks:
+  internal:
