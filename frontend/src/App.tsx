@@ -29,6 +29,10 @@ const TasksPage = lazy(() => import('@/pages/committee/TasksPage'), 'TasksPage')
 const FilesPage = lazy(() => import('@/pages/files/FilesPage'), 'FilesPage');
 const NewFilePage = lazy(() => import('@/pages/files/NewFilePage'), 'NewFilePage');
 const FileDetailPage = lazy(() => import('@/pages/files/FileDetailPage'), 'FileDetailPage');
+const MyRequestsPage = lazy(() => import('@/pages/requests/RequestPages'), 'MyRequestsPage');
+const NewRequestPage = lazy(() => import('@/pages/requests/RequestPages'), 'NewRequestPage');
+const RequestInboxPage = lazy(() => import('@/pages/requests/RequestPages'), 'RequestInboxPage');
+const RequestPage = lazy(() => import('@/pages/requests/RequestPages'), 'RequestPage');
 const ContractsPage = lazy(() => import('@/pages/contracts/ContractsPage'), 'ContractsPage');
 const ContractTimelinePage = lazy(() => import('@/pages/contracts/ContractTimelinePage'), 'ContractTimelinePage');
 const SessionsPage = lazy(() => import('@/pages/sessions/SessionsPage'), 'SessionsPage');
@@ -105,6 +109,10 @@ function AppRoutes() {
           <Route path="files" element={<FilesPage />} />
           <Route path="files/new" element={<NewFilePage />} />
           <Route path="files/:id" element={<FileDetailPage />} />
+          <Route path="requests" element={<MyRequestsPage />} />
+          <Route path="requests/new" element={<NewRequestPage />} />
+          <Route path="requests/inbox" element={<RequestInboxPage />} />
+          <Route path="requests/:id" element={<RequestPage />} />
           <Route path="contracts" element={<ContractsPage />} />
           <Route path="contracts/:id" element={<ContractTimelinePage />} />
           <Route path="sessions" element={<SessionsPage />} />

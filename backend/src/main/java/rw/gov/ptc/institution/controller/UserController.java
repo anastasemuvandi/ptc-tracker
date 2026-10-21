@@ -18,8 +18,10 @@ import rw.gov.ptc.common.ApiException;
 import rw.gov.ptc.common.Rows;
 import rw.gov.ptc.institution.dto.InviteRequest;
 import rw.gov.ptc.institution.dto.ProfileUpdate;
+import rw.gov.ptc.institution.dto.RequesterAccess;
 import rw.gov.ptc.institution.entity.AppUser;
 import rw.gov.ptc.institution.repository.AppUserRepository;
+import rw.gov.ptc.institution.service.RequesterAccessService;
 import rw.gov.ptc.security.Access;
 import rw.gov.ptc.tenancy.TenantContext;
 
@@ -39,9 +41,11 @@ public class UserController {
     private final Access access;
     private final AuditService audit;
     private final JdbcTemplate jdbc;
+    private final RequesterAccessService requesters;
 
     public UserController(AppUserRepository users, IdentityAdmin identity, Access access, AuditService audit,
-                          JdbcTemplate jdbc) {
+                          JdbcTemplate jdbc, RequesterAccessService requesters) {
+        this.requesters = requesters;
         this.users = users;
         this.identity = identity;
         this.access = access;
@@ -98,7 +102,7 @@ public class UserController {
         TenantContext.requireInstitution();
         return Rows.camel(jdbc.queryForList("""
                 SELECT u.id, u.email, u.full_name, u.job_title, u.office_holder_code, u.is_procurement_officer,
-                       u.status, u.locale,
+                       u.status, u.locale, u.requester_category, u.access_until,
                        coalesce((SELECT array_agg(r.role ORDER BY r.role) FROM user_role r WHERE r.user_id = u.id), '{}') AS roles
                   FROM app_user u ORDER BY u.full_name
                 """));
@@ -111,9 +115,16 @@ public class UserController {
         if (roles.contains(InstitutionRole.PLATFORM_ADMIN)) {
             throw ApiException.forbidden("forbidden", "Cannot grant platform administration");
         }
+        boolean requester = roles.contains(InstitutionRole.REQUESTER);
+        if (requester) {
+            requesters.validate(req.requesterCategory(), req.accessUntil());
+        }
         UUID id = identity.invite(new IdentityAdmin.Invitation(TenantContext.requireInstitution(), req.email(),
                 req.fullName(), req.jobTitle(), req.officeHolderCode(), req.procurementOfficer(), req.locale(), roles),
                 access.userId());
+        if (requester) {
+            requesters.apply(id, req.requesterCategory(), req.accessUntil());
+        }
         return Map.of("id", id);
     }
 
@@ -144,8 +155,21 @@ public class UserController {
                         "The Chief Budget Manager cannot hold a committee seat. End the membership first.");
             }
         }
+        requireSameInstitution(id);
+        AppUser u = users.findById(id).orElseThrow();
+        if (roles.contains(InstitutionRole.REQUESTER) && u.requesterCategory == null) {
+            throw ApiException.badRequest("user.requester_category_required",
+                    "Set the requester's access (short term or long term) first");
+        }
         identity.setInstitutionRoles(id, TenantContext.requireInstitution(), roles, access.userId());
         return ResponseEntity.noContent().build();
+    }
+
+    /** Onboarding a requester: short-term access with an end date, or long-term access. */
+    @PutMapping("/users/{id}/requester-access")
+    public AppUser setRequesterAccess(@PathVariable UUID id, @RequestBody RequesterAccess req) {
+        access.requireInstitutionAdmin();
+        return requesters.apply(id, req.category(), req.accessUntil());
     }
 
     @PutMapping("/users/{id}/status")

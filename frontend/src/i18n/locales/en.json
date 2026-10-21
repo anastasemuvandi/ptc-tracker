@@ -69,7 +69,9 @@
     "skipToContent": "Skip to content",
     "tasks": "Tasks",
     "users": "Users",
-    "guide": "User guide"
+    "guide": "User guide",
+    "requestInbox": "Requests",
+    "myRequests": "My requests"
   },
   "auth": {
     "acceptInviteHelp": "Choose a password to activate your account.",
@@ -206,7 +208,8 @@
     "PLATFORM_ADMIN": "Platform administrator",
     "INSTITUTION_ADMIN": "Institution administrator",
     "CBM": "Chief Budget Manager",
-    "READ_ONLY": "Read-only (internal audit)"
+    "READ_ONLY": "Read-only (internal audit)",
+    "REQUESTER": "Requester"
   },
   "recommendation": {
     "AWARD": "Award to the recommended bidder",
@@ -1197,7 +1200,18 @@
       "LEGAL_ADVISOR": "Legal advisor",
       "LOGISTICS_OFFICER": "Logistics officer",
       "LOWEST_JOB_CATEGORY": "Lowest job category"
-    }
+    },
+    "shortTermUntil": "Short term until {{date}}",
+    "category": {
+      "SHORT_TERM": "Short term",
+      "LONG_TERM": "Long term"
+    },
+    "requesterCategory": "Requester access",
+    "accessUntil": "Access ends on",
+    "accessUntilHint": "The account is disabled automatically after this day.",
+    "requesterHelp": "A requester submits requests to the committee (amendments, extensions, requests for a recommendation) and follows their progress. They see nothing else of the committee's work.",
+    "requesterAccess": "Requester access",
+    "saveAccess": "Save access"
   },
   "institution": {
     "calendar": "Holiday calendar",
@@ -1308,7 +1322,12 @@
       "framework.annualEvaluationAlertDays": "Alert before framework annual evaluation (days)",
       "committee.periodMonths": "Committee period (months)",
       "term.limitBlocks": "Block appointments beyond the renewal limit",
-      "agenda.activities": "Activities that may be scheduled per file type"
+      "agenda.activities": "Activities that may be scheduled per file type",
+      "request.types": "Types a requester may submit",
+      "request.minDocuments": "Documents required to submit a request",
+      "request.maxDocuments": "Documents allowed per request",
+      "request.maxDocumentBytes": "Largest document (bytes)",
+      "request.documentTypes": "Accepted document formats"
     }
   },
   "audit": {
@@ -1461,7 +1480,10 @@
       "invalid_locale": "Unsupported language.",
       "invalid_roles": "These roles cannot be combined.",
       "invalid_status": "Unknown status.",
-      "not_invited": "This user has already accepted the invitation."
+      "not_invited": "This user has already accepted the invitation.",
+      "requester_category_required": "Choose short-term or long-term access for the requester.",
+      "access_until_required": "Short-term access needs an end date.",
+      "access_until_past": "The end of access cannot be in the past."
     },
     "institution": {
       "font_size": "Font size must be between 8 and 16.",
@@ -1789,6 +1811,23 @@
       "reason_required": "Say why the activity was not completed.",
       "stage_completed": "This evaluation stage is already completed.",
       "recommendation_not_adopted": "This activity completes when the committee adopts a recommendation by vote."
+    },
+    "request": {
+      "access_ended": "Your access as a requester has ended. Contact the institution administrator.",
+      "invalid_type": "Choose a type of request.",
+      "invalid": "Give a title and describe the request.",
+      "contract_ref_required": "Give the reference of the contract concerned.",
+      "not_editable": "Only a draft or returned request can be changed.",
+      "declaration_required": "Confirm that the documents contain no bid documents, bidder submissions or prices.",
+      "documents_required": "Attach the supporting documents before submitting.",
+      "not_withdrawable": "This request can no longer be withdrawn.",
+      "too_many_documents": "A request takes at most {{max}} documents.",
+      "document_empty": "The document is empty.",
+      "document_too_large": "The document is larger than {{maxMb}} MB.",
+      "document_type": "Attach PDF, Word, Excel or image documents only.",
+      "committee_required": "Choose the committee that will examine it.",
+      "decided": "This request has already been decided.",
+      "reason_required": "Say why the request is returned."
     }
   },
   "guide": {
@@ -1827,5 +1866,80 @@
     "progress": "{{done}} of {{total}} activities completed",
     "recordBeforeClosing_one": "Record {{count}} remaining activity before closing the session.",
     "recordBeforeClosing_other": "Record the {{count}} remaining activities before closing the session."
+  },
+  "requests": {
+    "number": "Number",
+    "titleLabel": "Title",
+    "requester": "Requester",
+    "submitted": "Submitted",
+    "status": {
+      "DRAFT": "Draft",
+      "SUBMITTED": "Submitted",
+      "ACCEPTED": "Accepted",
+      "RETURNED": "Returned",
+      "WITHDRAWN": "Withdrawn"
+    },
+    "mineTitle": "My requests",
+    "mineSubtitle": "Requests you have sent to the tender committee, and where they stand.",
+    "new": "New request",
+    "inboxTitle": "Requests",
+    "inboxSubtitle": "Requests submitted to the committee. Accept one to register it as a file, or return it with a reason.",
+    "allStatuses": "All statuses",
+    "type": "Type of request",
+    "typeHelp": {
+      "C": "A change to a signed contract (addendum): value, quantities or scope.",
+      "D": "More time to complete a signed contract.",
+      "H": "Any other matter on which you need the committee's recommendation."
+    },
+    "types": {
+      "C": "Contract amendment",
+      "D": "Contract extension",
+      "H": "Request for a recommendation"
+    },
+    "description": "Description",
+    "descriptionHint": "What is requested and why. Do not paste bidders' prices or bid content.",
+    "contractRef": "Contract reference",
+    "contractRefHint": "As in Umucyo, e.g. CT-2026-009.",
+    "draftSaved": "Draft saved: now attach the supporting documents",
+    "newHelp": "Save the request as a draft, attach the supporting documents, then submit it.",
+    "scopeNotice": "Umucyo remains the system of record: never attach bid documents, bidder submissions or prices.",
+    "saveDraft": "Save draft",
+    "withdrawn": "Request withdrawn",
+    "fromRequester": "From {{name}} {{job}}",
+    "returnedBy": "Returned by {{name}}",
+    "details": "Details",
+    "withdrawConfirm": "Withdraw this request? It cannot be submitted again.",
+    "withdraw": "Withdraw request",
+    "decide": "Decide on this request",
+    "decideHelp": "Accepting registers it as a file of your committee, ready to be put on a session agenda.",
+    "accept": "Accept as a file",
+    "return": "Return to the requester",
+    "openFile": "Open file {{file}}",
+    "progress": "Progress",
+    "registeredAs": "Registered as file {{file}} of {{committee}}.",
+    "nextSession": "On the agenda of session {{session}}, {{date}}.",
+    "documentAdded": "Document attached",
+    "documents": "Supporting documents",
+    "addDocument": "Attach a document",
+    "documentsHint": "PDF, Word, Excel or images, up to 10 MB each. Internal documents only: memos, justifications, reports.",
+    "noDocuments": "No documents attached yet.",
+    "download": "Download",
+    "removeDocument": "Remove",
+    "submittedToast": "Request submitted to the committee",
+    "resubmit": "Submit again",
+    "submit": "Submit to the committee",
+    "declaration": "I confirm that the attached documents contain no bid documents, bidder submissions or prices, which remain in Umucyo.",
+    "attachFirst": "Attach at least one supporting document first.",
+    "acceptHelp": "The request becomes a file of the chosen committee. You can then put it on a session agenda.",
+    "contractMatchHint": "The requester gave {{ref}}.",
+    "registerContract": "Contract not listed? Register it under Contracts first.",
+    "noOfficer": "Not assigned",
+    "targetHint": "Leave empty to use the configured working days.",
+    "acceptedToast": "Request accepted and registered as a file",
+    "returnHelp": "The requester sees your reason, can correct the request and submit it again.",
+    "returnedToast": "Request returned to the requester",
+    "fromRequest": "Request {{number}}",
+    "submittedBy": "Submitted by {{name}} on {{date}}",
+    "openRequest": "Open request"
   }
 }

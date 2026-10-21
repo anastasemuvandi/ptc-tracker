@@ -69,7 +69,9 @@
     "skipToContent": "Aller au contenu",
     "tasks": "Tâches",
     "users": "Utilisateurs",
-    "guide": "Guide de l'utilisateur"
+    "guide": "Guide de l'utilisateur",
+    "requestInbox": "Demandes",
+    "myRequests": "Mes demandes"
   },
   "auth": {
     "acceptInviteHelp": "Choisissez un mot de passe pour activer votre compte.",
@@ -206,7 +208,8 @@
     "PLATFORM_ADMIN": "Administrateur de la plateforme",
     "INSTITUTION_ADMIN": "Administrateur de l'institution",
     "CBM": "Chief Budget Manager",
-    "READ_ONLY": "Lecture seule (audit interne)"
+    "READ_ONLY": "Lecture seule (audit interne)",
+    "REQUESTER": "Demandeur"
   },
   "recommendation": {
     "AWARD": "Attribuer au soumissionnaire recommandé",
@@ -1197,7 +1200,18 @@
       "LEGAL_ADVISOR": "Conseiller juridique",
       "LOGISTICS_OFFICER": "Chargé de la logistique",
       "LOWEST_JOB_CATEGORY": "Catégorie d'emploi la plus basse"
-    }
+    },
+    "shortTermUntil": "Court terme jusqu'au {{date}}",
+    "category": {
+      "SHORT_TERM": "Court terme",
+      "LONG_TERM": "Long terme"
+    },
+    "requesterCategory": "Accès du demandeur",
+    "accessUntil": "Fin de l'accès",
+    "accessUntilHint": "Le compte est désactivé automatiquement après ce jour.",
+    "requesterHelp": "Un demandeur soumet des demandes au comité (avenants, prorogations, demandes de recommandation) et suit leur avancement. Il ne voit rien d'autre des travaux du comité.",
+    "requesterAccess": "Accès du demandeur",
+    "saveAccess": "Enregistrer l'accès"
   },
   "institution": {
     "calendar": "Calendrier des jours fériés",
@@ -1308,7 +1322,12 @@
       "framework.annualEvaluationAlertDays": "Alerte avant l'évaluation annuelle de l'accord-cadre (jours)",
       "committee.periodMonths": "Durée de la période du comité (mois)",
       "term.limitBlocks": "Bloquer les nominations au-delà de la limite de renouvellement",
-      "agenda.activities": "Activités pouvant être programmées par type de dossier"
+      "agenda.activities": "Activités pouvant être programmées par type de dossier",
+      "request.types": "Types qu'un demandeur peut soumettre",
+      "request.minDocuments": "Documents requis pour soumettre",
+      "request.maxDocuments": "Documents autorisés par demande",
+      "request.maxDocumentBytes": "Taille maximale d'un document (octets)",
+      "request.documentTypes": "Formats de documents acceptés"
     }
   },
   "audit": {
@@ -1461,7 +1480,10 @@
       "invalid_locale": "Langue non prise en charge.",
       "invalid_roles": "Ces rôles ne peuvent pas être combinés.",
       "invalid_status": "Statut inconnu.",
-      "not_invited": "Cet utilisateur a déjà accepté l'invitation."
+      "not_invited": "Cet utilisateur a déjà accepté l'invitation.",
+      "requester_category_required": "Choisissez un accès court terme ou long terme pour le demandeur.",
+      "access_until_required": "Un accès court terme exige une date de fin.",
+      "access_until_past": "La fin de l'accès ne peut pas être dans le passé."
     },
     "institution": {
       "font_size": "La taille de police doit être comprise entre 8 et 16.",
@@ -1789,6 +1811,23 @@
       "reason_required": "Indiquez pourquoi l'activité n'a pas été réalisée.",
       "stage_completed": "Cette étape d'évaluation est déjà terminée.",
       "recommendation_not_adopted": "Cette activité est réalisée lorsque le comité adopte une recommandation par vote."
+    },
+    "request": {
+      "access_ended": "Votre accès de demandeur a pris fin. Contactez l'administrateur de l'institution.",
+      "invalid_type": "Choisissez un type de demande.",
+      "invalid": "Donnez un titre et décrivez la demande.",
+      "contract_ref_required": "Indiquez la référence du marché concerné.",
+      "not_editable": "Seule une demande en brouillon ou renvoyée peut être modifiée.",
+      "declaration_required": "Confirmez que les documents ne contiennent ni offres, ni soumissions, ni prix.",
+      "documents_required": "Joignez les pièces justificatives avant de soumettre.",
+      "not_withdrawable": "Cette demande ne peut plus être retirée.",
+      "too_many_documents": "Une demande accepte au plus {{max}} documents.",
+      "document_empty": "Le document est vide.",
+      "document_too_large": "Le document dépasse {{maxMb}} Mo.",
+      "document_type": "Joignez uniquement des documents PDF, Word, Excel ou des images.",
+      "committee_required": "Choisissez le comité qui l'examinera.",
+      "decided": "Il a déjà été statué sur cette demande.",
+      "reason_required": "Indiquez pourquoi la demande est renvoyée."
     }
   },
   "guide": {
@@ -1827,5 +1866,80 @@
     "progress": "{{done}} activités réalisées sur {{total}}",
     "recordBeforeClosing_one": "Enregistrez l'activité restante avant de clore la séance.",
     "recordBeforeClosing_other": "Enregistrez les {{count}} activités restantes avant de clore la séance."
+  },
+  "requests": {
+    "number": "Numéro",
+    "titleLabel": "Titre",
+    "requester": "Demandeur",
+    "submitted": "Soumise",
+    "status": {
+      "DRAFT": "Brouillon",
+      "SUBMITTED": "Soumise",
+      "ACCEPTED": "Acceptée",
+      "RETURNED": "Renvoyée",
+      "WITHDRAWN": "Retirée"
+    },
+    "mineTitle": "Mes demandes",
+    "mineSubtitle": "Les demandes que vous avez adressées au comité des marchés, et leur état.",
+    "new": "Nouvelle demande",
+    "inboxTitle": "Demandes",
+    "inboxSubtitle": "Demandes soumises au comité. Acceptez-en une pour l'enregistrer comme dossier, ou renvoyez-la avec un motif.",
+    "allStatuses": "Tous les états",
+    "type": "Type de demande",
+    "typeHelp": {
+      "C": "Une modification d'un marché signé (avenant) : montant, quantités ou étendue.",
+      "D": "Un délai supplémentaire pour exécuter un marché signé.",
+      "H": "Toute autre question sur laquelle vous sollicitez la recommandation du comité."
+    },
+    "types": {
+      "C": "Avenant au marché",
+      "D": "Prorogation du marché",
+      "H": "Demande de recommandation"
+    },
+    "description": "Description",
+    "descriptionHint": "Ce qui est demandé et pourquoi. Ne collez pas de prix ni de contenu d'offres.",
+    "contractRef": "Référence du marché",
+    "contractRefHint": "Comme dans Umucyo, p. ex. CT-2026-009.",
+    "draftSaved": "Brouillon enregistré : joignez maintenant les pièces justificatives",
+    "newHelp": "Enregistrez la demande comme brouillon, joignez les pièces justificatives, puis soumettez-la.",
+    "scopeNotice": "Umucyo reste le système de référence : ne joignez jamais d'offres, de soumissions ni de prix.",
+    "saveDraft": "Enregistrer le brouillon",
+    "withdrawn": "Demande retirée",
+    "fromRequester": "De {{name}} {{job}}",
+    "returnedBy": "Renvoyée par {{name}}",
+    "details": "Détails",
+    "withdrawConfirm": "Retirer cette demande ? Elle ne pourra plus être soumise.",
+    "withdraw": "Retirer la demande",
+    "decide": "Statuer sur cette demande",
+    "decideHelp": "L'accepter l'enregistre comme dossier de votre comité, prêt à être inscrit à l'ordre du jour.",
+    "accept": "Accepter comme dossier",
+    "return": "Renvoyer au demandeur",
+    "openFile": "Ouvrir le dossier {{file}}",
+    "progress": "Avancement",
+    "registeredAs": "Enregistrée comme dossier {{file}} de {{committee}}.",
+    "nextSession": "À l'ordre du jour de la séance {{session}}, {{date}}.",
+    "documentAdded": "Document joint",
+    "documents": "Pièces justificatives",
+    "addDocument": "Joindre un document",
+    "documentsHint": "PDF, Word, Excel ou images, 10 Mo maximum chacun. Documents internes uniquement : notes, justifications, rapports.",
+    "noDocuments": "Aucun document joint.",
+    "download": "Télécharger",
+    "removeDocument": "Retirer",
+    "submittedToast": "Demande soumise au comité",
+    "resubmit": "Soumettre de nouveau",
+    "submit": "Soumettre au comité",
+    "declaration": "Je confirme que les documents joints ne contiennent ni offres, ni soumissions, ni prix, qui restent dans Umucyo.",
+    "attachFirst": "Joignez d'abord au moins une pièce justificative.",
+    "acceptHelp": "La demande devient un dossier du comité choisi. Vous pourrez ensuite l'inscrire à l'ordre du jour d'une séance.",
+    "contractMatchHint": "Le demandeur a indiqué {{ref}}.",
+    "registerContract": "Marché absent de la liste ? Enregistrez-le d'abord sous Marchés.",
+    "noOfficer": "Non attribué",
+    "targetHint": "Laissez vide pour appliquer les jours ouvrables configurés.",
+    "acceptedToast": "Demande acceptée et enregistrée comme dossier",
+    "returnHelp": "Le demandeur voit votre motif, peut corriger la demande et la soumettre de nouveau.",
+    "returnedToast": "Demande renvoyée au demandeur",
+    "fromRequest": "Demande {{number}}",
+    "submittedBy": "Soumise par {{name}} le {{date}}",
+    "openRequest": "Ouvrir la demande"
   }
 }

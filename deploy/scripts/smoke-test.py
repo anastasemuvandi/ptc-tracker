@@ -57,6 +57,20 @@ class Client:
             return status, payload
         return json.loads(payload) if payload else None
 
+    def upload(self, path, name, content_type, content):
+        """multipart/form-data with one part named "file"."""
+        boundary = uuid.uuid4().hex
+        body = (f"--{boundary}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"{name}\"\r\n"
+                f"Content-Type: {content_type}\r\n\r\n").encode() + content + f"\r\n--{boundary}--\r\n".encode()
+        req = urllib.request.Request(BASE + path, data=body, method="POST", headers={
+            "Content-Type": f"multipart/form-data; boundary={boundary}", "X-PTC-Client": "web",
+            "Authorization": "Bearer " + self.token, "Idempotency-Key": str(uuid.uuid4())})
+        try:
+            with self.opener.open(req) as r:
+                return r.status, json.loads(r.read())
+        except urllib.error.HTTPError as e:
+            return e.code, e.read()
+
     def next_code(self):
         """A TOTP code for a step not used before (the server refuses replays)."""
         while True:
@@ -230,6 +244,25 @@ plain = re.sub(r"<[^>]+>", "", text)
 check(".docx downloaded and references the file number", f["fileNumber"] in plain)
 check(".docx carries the dissent reason", "retendered as a separate lot" in plain)
 check(".docx contains no UUIDs", UUID_RE.search(plain) is None)
+
+# Requests from outside the committee: onboarded by the administrator, documents through nginx.
+admin.call("POST", "/api/users", {"email": f"req.{RUN}@example.rw", "fullName": "Site Engineer", "locale": "en",
+                                  "roles": ["REQUESTER"], "requesterCategory": "LONG_TERM"})
+requester = onboard("requester", f"req.{RUN}@example.rw")
+rq = requester.call("POST", "/api/requests", {"itemType": "H", "title": "Advice on site handover delay",
+                                              "description": "The site was handed over six weeks late; advise on the way forward."})
+big = b"%PDF-1.4\n" + b"0" * (8 * 1024 * 1024)
+status, doc = requester.upload(f"/api/requests/{rq['id']}/documents", "handover-report.pdf", "application/pdf", big)
+check("8 MB supporting document accepted through nginx", status == 200)
+requester.call("POST", f"/api/requests/{rq['id']}/submit", {"declarationConfirmed": True})
+check("officers see the submitted request", any(x["id"] == rq["id"] for x in sec.call("GET", "/api/requests/inbox")))
+status, content = sec.call("GET", f"/api/requests/{rq['id']}/documents/{doc['id']}", raw=True)
+check("officer downloads the document intact", content == big)
+sec.call("POST", f"/api/requests/{rq['id']}/accept", {"committeeId": cid})
+mine = requester.call("GET", f"/api/requests/{rq['id']}")
+check("requester follows the accepted request as a file", mine["status"] == "ACCEPTED" and mine["file"]["fileNumber"].startswith("F-"))
+status, payload = requester.call("GET", "/api/files", expect=(200, 403), raw=True)
+check("requester sees no committee files", status == 403 or json.loads(payload) == [])
 
 # Tenant isolation through the full stack: a second institution sees nothing.
 inst2 = pa.call("POST", "/api/platform/institutions", {

@@ -69,7 +69,9 @@
     "skipToContent": "Jya ku bikubiyemo",
     "tasks": "Imirimo",
     "users": "Abakoresha",
-    "guide": "Igitabo cy’imikoreshereze"
+    "guide": "Igitabo cy’imikoreshereze",
+    "requestInbox": "Ubusabe",
+    "myRequests": "Ubusabe bwanjye"
   },
   "auth": {
     "acceptInviteHelp": "Hitamo ijambobanga kugira ngo konti yawe ikore.",
@@ -206,7 +208,8 @@
     "PLATFORM_ADMIN": "Umuyobozi w'urubuga",
     "INSTITUTION_ADMIN": "Umuyobozi wa sisitemu mu kigo",
     "CBM": "Chief Budget Manager",
-    "READ_ONLY": "Gusoma gusa (igenzura ry'imbere)"
+    "READ_ONLY": "Gusoma gusa (igenzura ry'imbere)",
+    "REQUESTER": "Usaba"
   },
   "recommendation": {
     "AWARD": "Guha isoko upiganwa watoranyijwe",
@@ -1197,7 +1200,18 @@
       "LEGAL_ADVISOR": "Umujyanama mu by'amategeko",
       "LOGISTICS_OFFICER": "Ushinzwe ibikoresho",
       "LOWEST_JOB_CATEGORY": "Icyiciro cy'akazi cyo hasi"
-    }
+    },
+    "shortTermUntil": "Igihe gito kugeza {{date}}",
+    "category": {
+      "SHORT_TERM": "Igihe gito",
+      "LONG_TERM": "Igihe kirekire"
+    },
+    "requesterCategory": "Uburenganzira bw'usaba",
+    "accessUntil": "Uburenganzira burangira ku wa",
+    "accessUntilHint": "Konti ihagarikwa ubwayo nyuma y'uyu munsi.",
+    "requesterHelp": "Usaba yohereza ubusabe kuri komite (guhindura amasezerano, kongera igihe, gusaba icyemezo) kandi akurikirana aho bugeze. Nta kindi abona ku mirimo ya komite.",
+    "requesterAccess": "Uburenganzira bw'usaba",
+    "saveAccess": "Bika uburenganzira"
   },
   "institution": {
     "calendar": "Ingengabihe y'iminsi y'ikiruhuko",
@@ -1308,7 +1322,12 @@
       "framework.annualEvaluationAlertDays": "Kuburira mbere y'isuzuma ngarukamwaka ry'amasezerano y'urwego (iminsi)",
       "committee.periodMonths": "Igihe cya manda ya komite (amezi)",
       "term.limitBlocks": "Kubuza ishyirwaho rirenze umubare w'ivugururwa wemewe",
-      "agenda.activities": "Ibikorwa bishobora gutegurwa kuri buri bwoko bwa dosiye"
+      "agenda.activities": "Ibikorwa bishobora gutegurwa kuri buri bwoko bwa dosiye",
+      "request.types": "Ubwoko usaba ashobora kohereza",
+      "request.minDocuments": "Inyandiko zisabwa mbere yo kohereza",
+      "request.maxDocuments": "Inyandiko zemewe kuri buri busabe",
+      "request.maxDocumentBytes": "Ingano ntarengwa y'inyandiko (bytes)",
+      "request.documentTypes": "Ubwoko bw'inyandiko bwemewe"
     }
   },
   "audit": {
@@ -1461,7 +1480,10 @@
       "invalid_locale": "Ururimi rudashyigikiwe.",
       "invalid_roles": "Izi nshingano ntizishobora guhuzwa.",
       "invalid_status": "Imiterere itazwi.",
-      "not_invited": "Uyu muntu yamaze kwemera ubutumire."
+      "not_invited": "Uyu muntu yamaze kwemera ubutumire.",
+      "requester_category_required": "Hitamo uburenganzira bw'igihe gito cyangwa kirekire ku usaba.",
+      "access_until_required": "Uburenganzira bw'igihe gito busaba itariki burangiriraho.",
+      "access_until_past": "Itariki uburenganzira burangiriraho ntishobora kuba yarenze."
     },
     "institution": {
       "font_size": "Ingano y'inyuguti igomba kuba hagati ya 8 na 16.",
@@ -1789,6 +1811,23 @@
       "reason_required": "Sobanura impamvu igikorwa kitakozwe.",
       "stage_completed": "Iki cyiciro cy'isuzuma cyarangiye.",
       "recommendation_not_adopted": "Iki gikorwa kirangira komite yemeje icyemezo binyuze mu matora."
+    },
+    "request": {
+      "access_ended": "Uburenganzira bwawe bwo gusaba bwarangiye. Vugana n'umuyobozi wa sisitemu mu kigo.",
+      "invalid_type": "Hitamo ubwoko bw'ubusabe.",
+      "invalid": "Tanga umutwe kandi usobanure ubusabe.",
+      "contract_ref_required": "Tanga nimero y'amasezerano bireba.",
+      "not_editable": "Ubusabe buri mu mushinga cyangwa bwasubijwe ni bwo bwonyine buhindurwa.",
+      "declaration_required": "Emeza ko inyandiko zitarimo inyandiko z'ipiganwa, ibyo abapiganwa batanze cyangwa ibiciro.",
+      "documents_required": "Omekaho inyandiko zishyigikira mbere yo kohereza.",
+      "not_withdrawable": "Ubu busabe ntibukibasha gukurwaho.",
+      "too_many_documents": "Ubusabe bwakira inyandiko zitarenze {{max}}.",
+      "document_empty": "Inyandiko irimo ubusa.",
+      "document_too_large": "Inyandiko irenze MB {{maxMb}}.",
+      "document_type": "Omekaho inyandiko za PDF, Word, Excel cyangwa amafoto gusa.",
+      "committee_required": "Hitamo komite izabusuzuma.",
+      "decided": "Ubu busabe bwafashweho icyemezo.",
+      "reason_required": "Sobanura impamvu ubusabe busubijwe."
     }
   },
   "guide": {
@@ -1827,5 +1866,80 @@
     "progress": "Ibikorwa {{done}} kuri {{total}} byakozwe",
     "recordBeforeClosing_one": "Andika igikorwa {{count}} gisigaye mbere yo gusoza inama.",
     "recordBeforeClosing_other": "Andika ibikorwa {{count}} bisigaye mbere yo gusoza inama."
+  },
+  "requests": {
+    "number": "Nimero",
+    "titleLabel": "Umutwe",
+    "requester": "Usaba",
+    "submitted": "Bwatanzwe",
+    "status": {
+      "DRAFT": "Umushinga",
+      "SUBMITTED": "Bwatanzwe",
+      "ACCEPTED": "Bwemewe",
+      "RETURNED": "Bwasubijwe",
+      "WITHDRAWN": "Bwakuweho"
+    },
+    "mineTitle": "Ubusabe bwanjye",
+    "mineSubtitle": "Ubusabe woherereje komite ishinzwe amasoko, n'aho bugeze.",
+    "new": "Ubusabe bushya",
+    "inboxTitle": "Ubusabe",
+    "inboxSubtitle": "Ubusabe bwoherejwe kuri komite. Bwemere bube dosiye, cyangwa ubusubize ugaragaza impamvu.",
+    "allStatuses": "Imiterere yose",
+    "type": "Ubwoko bw'ubusabe",
+    "typeHelp": {
+      "C": "Guhindura amasezerano yasinywe: agaciro, ingano cyangwa ibikubiyemo.",
+      "D": "Kongera igihe cyo kurangiza amasezerano yasinywe.",
+      "H": "Ikindi kibazo ukeneyeho icyemezo cya komite."
+    },
+    "types": {
+      "C": "Guhindura amasezerano",
+      "D": "Kongera igihe cy'amasezerano",
+      "H": "Gusaba icyemezo"
+    },
+    "description": "Ibisobanuro",
+    "descriptionHint": "Ibisabwa n'impamvu. Ntushyiremo ibiciro by'abapiganwa cyangwa ibikubiye mu mapiganwa.",
+    "contractRef": "Nimero y'amasezerano",
+    "contractRefHint": "Nk'uko iri muri Umucyo, urugero CT-2026-009.",
+    "draftSaved": "Umushinga wabitswe: ubu omekaho inyandiko zibushyigikira",
+    "newHelp": "Bika ubusabe nk'umushinga, omekaho inyandiko zibushyigikira, hanyuma ubwohereze.",
+    "scopeNotice": "Umucyo ukomeza kuba ububiko nyamukuru: ntuzigere womekaho inyandiko z'ipiganwa, ibyo abapiganwa batanze cyangwa ibiciro.",
+    "saveDraft": "Bika umushinga",
+    "withdrawn": "Ubusabe bwakuweho",
+    "fromRequester": "Bivuye kuri {{name}} {{job}}",
+    "returnedBy": "Bwasubijwe na {{name}}",
+    "details": "Ibisobanuro birambuye",
+    "withdrawConfirm": "Gukuraho ubu busabe? Ntibuzongera kohererezwa.",
+    "withdraw": "Kuraho ubusabe",
+    "decide": "Fata icyemezo kuri ubu busabe",
+    "decideHelp": "Kubwemera bibwandika nka dosiye ya komite yawe, bwiteguye gushyirwa ku murongo w'ibyigwa.",
+    "accept": "Emera nka dosiye",
+    "return": "Subiza usaba",
+    "openFile": "Fungura dosiye {{file}}",
+    "progress": "Aho bugeze",
+    "registeredAs": "Bwanditswe nka dosiye {{file}} ya {{committee}}.",
+    "nextSession": "Buri ku murongo w'ibyigwa by'inama {{session}}, {{date}}.",
+    "documentAdded": "Inyandiko yometseho",
+    "documents": "Inyandiko zishyigikira",
+    "addDocument": "Omekaho inyandiko",
+    "documentsHint": "PDF, Word, Excel cyangwa amafoto, buri imwe itarenze MB 10. Inyandiko z'imbere gusa: inyandiko-mbwirwa, ibisobanuro, raporo.",
+    "noDocuments": "Nta nyandiko iromekwaho.",
+    "download": "Kuramo",
+    "removeDocument": "Kuraho",
+    "submittedToast": "Ubusabe bwoherejwe kuri komite",
+    "resubmit": "Ongera wohereze",
+    "submit": "Ohereza kuri komite",
+    "declaration": "Nemeza ko inyandiko zometseho zitarimo inyandiko z'ipiganwa, ibyo abapiganwa batanze cyangwa ibiciro, bigumishwa muri Umucyo.",
+    "attachFirst": "Banza womekeho nibura inyandiko imwe ishyigikira.",
+    "acceptHelp": "Ubusabe buba dosiye ya komite wahisemo. Nyuma ushobora kubushyira ku murongo w'ibyigwa by'inama.",
+    "contractMatchHint": "Usaba yatanze {{ref}}.",
+    "registerContract": "Amasezerano ntari ku rutonde? Banza uyandike muri Amasezerano.",
+    "noOfficer": "Ntawahawe",
+    "targetHint": "Reka ubusa kugira ngo hakoreshwe iminsi y'akazi yagenwe.",
+    "acceptedToast": "Ubusabe bwemewe kandi bwanditswe nka dosiye",
+    "returnHelp": "Usaba abona impamvu yawe, ashobora gukosora ubusabe akongera akabwohereza.",
+    "returnedToast": "Ubusabe bwasubijwe usaba",
+    "fromRequest": "Ubusabe {{number}}",
+    "submittedBy": "Bwatanzwe na {{name}} ku wa {{date}}",
+    "openRequest": "Fungura ubusabe"
   }
 }

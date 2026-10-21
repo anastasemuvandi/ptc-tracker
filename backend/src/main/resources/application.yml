@@ -40,8 +40,8 @@ spring:
       fail-on-unknown-properties: false
   servlet:
     multipart:
-      max-file-size: 5MB
-      max-request-size: 6MB
+      max-file-size: 11MB
+      max-request-size: 12MB
   quartz:
     job-store-type: memory
     scheduler-name: ptc-reminders

@@ -68,6 +68,7 @@ What you see in the menu depends on your role. You may hold different roles on d
 | Secretary (procurement officer) | Registers files, schedules sessions, keeps attendance, records evaluation progress, drafts minutes | Mandatory |
 | Member | Declares interests, votes, records dissent, acknowledges minutes, asks for files to be tabled | Set by institution |
 | Read-only (internal audit) | Reads everything in the institution, including the audit log; cannot change anything | Optional |
+| Requester | An employee outside the committee who submits requests (contract amendment, extension, request for a recommendation) with supporting documents and follows their progress; sees nothing else | Optional |
 
 ## Administrators
 
@@ -78,6 +79,7 @@ Under **Platform**, create an institution by giving its name, abbreviation, type
 ### Institution administrator
 
 - **Users:** invite people by email, giving their name, job title and language. Tick *procurement officer* where it applies, and record any office they hold (head of institution, head of finance, internal auditor, legal advisor, logistics officer, lowest job category) so committee appointments can be checked against the exclusion rules. Assign the institution roles *CBM*, *Institution administrator* or *Read-only*. Committee roles are given by the CBM, not here. From the same list you can resend an invitation, disable an account, or **reset two-step verification** for someone who lost their phone.
+- **Requesters (onboarding and offboarding):** an employee who needs to bring a request to the committee is invited like any user, with the role *Requester*. Choose **short term**, with the date access ends, or **long term**. The invitation email lets them set a password; their username is their email. Short-term access ends automatically after its last day; to offboard anyone earlier, disable the account. Use *Manage* to change the category or extend the end date.
 - **Institution:** name, letterhead text and the font family and size used in minutes. Upload your own **minutes template** (.docx, under 5 MB): its headers, footers and styles are kept and the minutes are written into its body.
 - **Rules & thresholds:** every legal threshold, period and rule is a setting, not fixed in the software: committee sizes, quorum and voting fractions, notice periods, cure period, amendment ceilings, term length and so on. Each change needs an **effective date**, a reason and, ideally, the legal reference (for example the Ministerial Order article). Changes cannot be backdated, and the full history is kept. Past decisions are always shown with the rules that applied when they were taken.
 - **Holidays:** the national public holiday calendar is shared by all institutions. Islamic holidays are entered as provisional and should be confirmed when government announces them. If your institution observes a different calendar, switch on *holiday override* in Institution settings and add or remove days here. Working-day deadlines (cure period, notice period, target dates) use this calendar.
@@ -128,7 +130,17 @@ You can register files for a committee, move a file to another committee (with a
 
 Your response is a separate, logged act. It never changes the committee's own decision record.
 
+## Requesters
+
+Under **My requests**, choose *New request*: the type (contract amendment, contract extension, or request for a recommendation), a title, a description of what is requested and why, and the contract reference as in Umucyo for amendments and extensions. *Save draft*, then attach the **supporting documents** (PDF, Word, Excel or images, up to 10 MB each). Attach internal documents only, such as memos, justifications and site reports: never bid documents, bidders' submissions or prices, which stay in Umucyo. Tick the declaration and *Submit to the committee*.
+
+The Chairperson, Vice-Chairperson or Secretary either accepts the request, which registers it as a file, or returns it with a reason. If it is returned, correct it and submit it again. Once accepted, the request shows the file number, its progress (received, scheduled, under review, recommendation issued, submitted to CBM, closed) and the session it is on. You receive a notification at each decision. You can withdraw a request until it is accepted.
+
 ## Committee officers: Chairperson, Vice-Chairperson, Secretary
+
+### Requests from outside the committee
+
+**Requests** lists what requesters have submitted, newest first. Open one to read it and download its documents. *Accept as a file* registers it in your committee: choose the committee, and for amendments and extensions the contract (the one matching the requester's reference is selected for you; register it under **Contracts** first if it is missing). The file can then go on a session agenda like any other. *Return to the requester* sends it back with your reason. A file that came from a request shows the request and its documents on the file page.
 
 Only the three officers can create or change sessions. Ordinary members can read the schedule and ask for a file to be tabled.
 

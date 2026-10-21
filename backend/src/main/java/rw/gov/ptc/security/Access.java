@@ -80,6 +80,11 @@ public class Access {
         return p.has(InstitutionRole.CBM) || p.has(InstitutionRole.INSTITUTION_ADMIN) || p.has(InstitutionRole.READ_ONLY);
     }
 
+    /** Chairperson, Vice-Chairperson or Secretary of at least one committee. */
+    public boolean isOfficerAnywhere() {
+        return principal().committees().stream().anyMatch(g -> g.role().isOfficer());
+    }
+
     public void requireCbm() {
         requireAny(InstitutionRole.CBM);
     }

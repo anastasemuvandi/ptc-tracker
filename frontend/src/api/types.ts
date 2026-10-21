@@ -7,7 +7,8 @@ export type IsoDate = string; // YYYY-MM-DD (Africa/Kigali calendar date)
 export type IsoInstant = string; // ISO-8601 UTC
 export type Decimal = string | number;
 
-export type InstitutionRole = 'PLATFORM_ADMIN' | 'INSTITUTION_ADMIN' | 'CBM' | 'READ_ONLY';
+export type InstitutionRole = 'PLATFORM_ADMIN' | 'INSTITUTION_ADMIN' | 'CBM' | 'READ_ONLY' | 'REQUESTER';
+export type RequesterCategory = 'SHORT_TERM' | 'LONG_TERM';
 export type CommitteeRole = 'CHAIRPERSON' | 'VICE_CHAIRPERSON' | 'SECRETARY' | 'MEMBER';
 export type ItemType = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I';
 export type ProcurementType = 'WORKS' | 'GOODS' | 'CONSULTANCY' | 'NON_CONSULTANCY';
@@ -72,6 +73,8 @@ export interface UserRow {
   status: 'INVITED' | 'ACTIVE' | 'LOCKED' | 'DISABLED';
   locale: Locale;
   roles: InstitutionRole[];
+  requesterCategory: RequesterCategory | null;
+  accessUntil: IsoDate | null;
 }
 export interface Institution {
   id: Uuid;
@@ -782,3 +785,71 @@ export interface NotificationRow {
 
 // ------------------------------------------------------------ dashboards
 export type Dashboard = Record<string, unknown>;
+
+// ------------------------------------------------------------- requests
+export type RequestStatus = 'DRAFT' | 'SUBMITTED' | 'ACCEPTED' | 'RETURNED' | 'WITHDRAWN';
+export interface RequestRow {
+  id: Uuid;
+  requestNumber: string;
+  itemType: ItemType;
+  title: string;
+  status: RequestStatus;
+  contractRef: string | null;
+  tenderRef: string | null;
+  submittedAt: IsoInstant | null;
+  decidedAt: IsoInstant | null;
+  createdAt: IsoInstant;
+  requesterName: string;
+  documentCount: number;
+  fileNumber: string | null;
+  fileStage: string | null;
+}
+export interface RequestDocumentRow {
+  id: Uuid;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  uploadedAt: IsoInstant;
+}
+export interface RequestDetail {
+  id: Uuid;
+  requestNumber: string;
+  itemType: ItemType;
+  title: string;
+  description: string;
+  contractRef: string | null;
+  tenderRef: string | null;
+  status: RequestStatus;
+  declaredAt: IsoInstant | null;
+  submittedAt: IsoInstant | null;
+  decidedAt: IsoInstant | null;
+  decisionNote: string | null;
+  createdAt: IsoInstant;
+  version: number;
+  requesterName: string;
+  requesterEmail: string;
+  requesterJobTitle: string | null;
+  decidedByName: string | null;
+  mine: boolean;
+  documents: RequestDocumentRow[];
+  file: {
+    id: Uuid; fileNumber: string; stage: string; closedAt: IsoInstant | null; committeeCode: string;
+    nextSession: { sessionNumber: string; scheduledAt: IsoInstant } | null;
+  } | null;
+}
+export interface RequestInput {
+  itemType: ItemType;
+  title: string;
+  description: string;
+  contractRef?: string;
+  tenderRef?: string;
+  version?: number;
+}
+export interface FileRequestSummary {
+  id: Uuid;
+  requestNumber: string;
+  requesterName: string;
+  submittedAt: IsoInstant;
+  description: string;
+  documents: RequestDocumentRow[];
+}

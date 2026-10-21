@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import {
   Bell, Building2, CalendarDays, ClipboardList, FileStack, Gauge, LayoutDashboard, LogOut, Menu, ScrollText,
-  Settings, ShieldCheck, SlidersHorizontal, Users, Landmark, BarChart3, ListChecks, FileSignature, BookOpen } from 'lucide-react';
+  Settings, ShieldCheck, SlidersHorizontal, Users, Landmark, BarChart3, ListChecks, FileSignature, BookOpen, Inbox, Send } from 'lucide-react';
 import { useSession } from '@/hooks/useSession';
 import { notifications } from '@/api/endpoints';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
@@ -40,6 +40,8 @@ function useNav(): NavItem[] {
     items.push({ to: '/contracts', label: t('nav.contracts'), icon: FileSignature });
     items.push({ to: '/committees', label: t('nav.committees'), icon: Users });
   }
+  if (isOfficerAnywhere || readsAll) items.push({ to: '/requests/inbox', label: t('nav.requestInbox'), icon: Inbox });
+  if (hasRole('REQUESTER')) items.push({ to: '/requests', label: t('nav.myRequests'), icon: Send });
   if (hasRole('CBM')) {
     items.push({ to: '/cbm', label: t('nav.cbm'), icon: ClipboardList });
     items.push({ to: '/dashboard/cbm', label: t('nav.cbmDashboard'), icon: Gauge });

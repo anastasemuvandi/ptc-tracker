@@ -26,6 +26,14 @@ Serve the `web` container behind the institution's TLS terminator. The
 refresh cookie is `Secure`; set `PTC_COOKIE_SECURE=false` only for local
 `http://localhost` trials.
 
+## Uploads
+
+Requesters attach supporting documents (up to `request.maxDocumentBytes`,
+10 MB by default) to their requests; they are stored in the database
+(`request_document`), so they are part of the regular database backup and
+size it. nginx accepts request bodies up to 12 MB (`client_max_body_size`)
+and Spring up to 11 MB per file; raise both with the setting if needed.
+
 ## Secrets and keys
 
 | Secret | Where | Notes |

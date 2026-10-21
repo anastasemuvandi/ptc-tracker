@@ -50,8 +50,9 @@ roles[], committees[{committee_id, role}], token_version, sid, amr`.
 | Method | Path | Notes |
 |---|---|---|
 | GET/PUT | `/api/me` | profile, `roles`, `committees[{committeeId,name,code,role,membershipId,termEnd}]`, `institution` |
-| GET | `/api/users` | institution users (`roles[]`, `isProcurementOfficer`, `officeHolderCode`, `status`) |
-| POST | `/api/users` | invite (INSTITUTION_ADMIN) `{email,fullName,jobTitle,officeHolderCode,procurementOfficer,locale,roles[]}` |
+| GET | `/api/users` | institution users (`roles[]`, `isProcurementOfficer`, `officeHolderCode`, `status`, `requesterCategory`, `accessUntil`) |
+| POST | `/api/users` | invite (INSTITUTION_ADMIN) `{email,fullName,jobTitle,officeHolderCode,procurementOfficer,locale,roles[],requesterCategory?,accessUntil?}`; with role REQUESTER: `requesterCategory` SHORT_TERM (needs `accessUntil`) or LONG_TERM. 400 `user.requester_category_required`, `user.access_until_required`; 422 `user.access_until_past` |
+| PUT | `/api/users/{id}/requester-access` | admin `{category, accessUntil?}`; short-term access ends automatically after `accessUntil` (daily job: the REQUESTER role is removed, or the account disabled if it had no other role) |
 | PUT | `/api/users/{id}` · `/roles` · `/status` | admin edits |
 | POST | `/api/users/{id}/resend-invitation` · `/reset-mfa` | |
 | GET/PUT | `/api/institution` | settings, minutes letterhead/font, `holidayOverride` |
@@ -63,6 +64,25 @@ roles[], committees[{committee_id, role}], token_version, sid, amr`.
 | GET | `/api/audit?entityId&actorId&action&before&limit` | READ_ONLY / admin / CBM |
 | GET | `/api/platform/metrics` | PLATFORM_ADMIN — operational counts only |
 | POST | `/api/platform/institutions` | create institution + invite first admin |
+
+## Requests (requesters submit; officers accept or return)
+
+Request types come from `request.types` (default C, D, H). Numbers are `REQ-<year>/<nnnn>`.
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/api/requests/mine` | requester's own `[{id,requestNumber,itemType,title,status,contractRef,tenderRef,submittedAt,decidedAt,createdAt,requesterName,documentCount,fileNumber,fileStage}]` |
+| GET | `/api/requests/inbox?status` | officers of any committee and readers of all committees; never drafts |
+| POST | `/api/requests` | REQUESTER `{itemType,title,description,contractRef?,tenderRef?}` → DRAFT; C/D need `contractRef`. 400 `request.invalid_type`, `request.invalid`, `request.contract_ref_required`; 403 `request.access_ended` |
+| GET | `/api/requests/{id}` | requester, or a reviewer once submitted: request + `documents[]` + `file{id,fileNumber,stage,committeeCode,nextSession}` |
+| PUT | `/api/requests/{id}` | requester, DRAFT/RETURNED; 422 `request.not_editable` |
+| POST | `/api/requests/{id}/documents` | multipart `file`; requester, DRAFT/RETURNED; formats `request.documentTypes` (content checked against the declared type), size `request.maxDocumentBytes`, count `request.maxDocuments`. 422 `request.document_type`, `request.document_too_large`, `request.too_many_documents` |
+| GET · DELETE | `/api/requests/{id}/documents/{docId}` | download (requester or reviewer) · remove (requester, DRAFT/RETURNED) |
+| POST | `/api/requests/{id}/submit` | `{declarationConfirmed:true}` (no bid documents, bidder submissions or prices); needs `request.minDocuments`. Notifies committee officers |
+| POST | `/api/requests/{id}/withdraw` | requester, before acceptance |
+| POST | `/api/requests/{id}/accept` | officer of `committeeId` `{committeeId, contractId?, procurementOfficerId?, targetDate?, title?}` → registers the file (H: referral = request number and description) and notifies the requester |
+| POST | `/api/requests/{id}/return` | officer `{reason}` → RETURNED; requester may edit and submit again |
+| GET | `/api/files/{fileId}/request` | the request behind a file with its documents (204 when none) |
 
 ## Committees (CBM constitutes; officers read)
 

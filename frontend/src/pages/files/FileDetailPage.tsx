@@ -21,6 +21,7 @@ import { EvaluationView } from '@/pages/evaluation/EvaluationView';
 import { ChecklistView } from '@/pages/evaluation/ChecklistView';
 import { AmendmentPanel } from '@/pages/contracts/AmendmentPanel';
 import { ExtensionPanel } from '@/pages/contracts/ExtensionPanel';
+import { FileRequestCard } from '@/pages/requests/RequestPages';
 
 export function FileDetailPage() {
   const { id = '' } = useParams();
@@ -88,6 +89,7 @@ function Overview({ file }: { file: FileDetail }) {
           ]} />
         </CardContent>
       </Card>
+      <FileRequestCard fileId={file.id} />
       <Card>
         <CardHeader><CardTitle>{t('common.actions')}</CardTitle></CardHeader>
         <CardContent className="grid gap-2">

@@ -7,9 +7,11 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import rw.gov.ptc.common.BaseEntity;
+import rw.gov.ptc.institution.enums.RequesterCategory;
 import rw.gov.ptc.institution.enums.UserStatus;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 /**
@@ -31,6 +33,9 @@ public class AppUser extends BaseEntity {
     public String officeHolderCode;
     public boolean isProcurementOfficer;
     public String locale;
+    @Enumerated(EnumType.STRING)
+    public RequesterCategory requesterCategory;
+    public LocalDate accessUntil;
     @Column(updatable = false, insertable = false)
     @Enumerated(EnumType.STRING)
     public UserStatus status;

@@ -35,6 +35,13 @@ public final class ConfigKeys {
     // Workflow
     public static final String WORKFLOW_STAGES = "workflow.stages";
     public static final String AGENDA_ACTIVITIES = "agenda.activities";
+
+    // Requests from outside the committee
+    public static final String REQUEST_TYPES = "request.types";
+    public static final String REQUEST_MIN_DOCUMENTS = "request.minDocuments";
+    public static final String REQUEST_MAX_DOCUMENTS = "request.maxDocuments";
+    public static final String REQUEST_MAX_DOCUMENT_BYTES = "request.maxDocumentBytes";
+    public static final String REQUEST_DOCUMENT_TYPES = "request.documentTypes";
     public static final String WORKFLOW_TARGET_WORKING_DAYS = "workflow.targetWorkingDays";
     public static final String RECOMMENDATION_CODES = "recommendation.codes";
     public static final String CHECKLIST_ITEMS = "checklist.items";

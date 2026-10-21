@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-PTC Tracker: multi-tenant PWA for Rwandan Public Tender Committees to track their own deliberation (files, sessions, votes, minutes). **Umucyo is the system of record**: never store bid documents, bidder submissions, prices or evaluation scores, and never add tender publication, bid opening or award features. Tenders, contracts and bidders are referenced by reference only.
+PTC Tracker: multi-tenant PWA for Rwandan Public Tender Committees to track their own deliberation (files, sessions, votes, minutes). **Umucyo is the system of record**: never store bid documents, bidder submissions, prices or evaluation scores, and never add tender publication, bid opening or award features. Tenders, contracts and bidders are referenced by reference only. The one stored document type is a request's internal supporting document (memo, justification, report), uploaded by a requester who declares it holds no bid content.
 
 Read `docs/ARCHITECTURE.md` (modules, conventions) and `docs/API.md` (HTTP contract) before changing backend or API shapes. `docs/OPERATIONS.md` covers deployment, keys and backups.
 

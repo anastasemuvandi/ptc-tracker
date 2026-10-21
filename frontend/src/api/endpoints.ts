@@ -76,7 +76,10 @@ export const identity = {
   invite: (body: {
     email: string; fullName: string; jobTitle?: string; officeHolderCode?: string;
     procurementOfficer: boolean; locale: T.Locale; roles: T.InstitutionRole[];
+    requesterCategory?: T.RequesterCategory; accessUntil?: string;
   }) => api.post<{ id: T.Uuid }>('/api/users', body),
+  setRequesterAccess: (id: T.Uuid, body: { category: T.RequesterCategory; accessUntil?: string }) =>
+    api.put<unknown>(`/api/users/${id}/requester-access`, body),
   updateUser: (id: T.Uuid, body: Record<string, unknown>) => api.put<unknown>(`/api/users/${id}`, body),
   setRoles: (id: T.Uuid, roles: T.InstitutionRole[]) => api.put<void>(`/api/users/${id}/roles`, roles),
   setStatus: (id: T.Uuid, status: string) => api.put<void>(`/api/users/${id}/status`, { status }),
@@ -327,4 +330,27 @@ export const dashboards = {
   report: (p: { from: string; to: string; committeeId?: string }) => api.get<T.Dashboard>(`/api/reports/summary${qs(p)}`),
   reportCsv: (p: { from: string; to: string; committeeId?: string }) =>
     download(`/api/reports/summary.csv${qs(p)}`, `ptc-report-${p.from}-${p.to}.csv`),
+};
+
+// ------------------------------------------------------------- requests
+export const requests = {
+  mine: () => api.get<T.RequestRow[]>('/api/requests/mine'),
+  inbox: (status?: string) => api.get<T.RequestRow[]>(`/api/requests/inbox${qs({ status })}`),
+  get: (id: T.Uuid) => api.get<T.RequestDetail>(`/api/requests/${id}`),
+  create: (body: T.RequestInput) => api.post<{ id: T.Uuid }>('/api/requests', body),
+  update: (id: T.Uuid, body: T.RequestInput) => api.put<unknown>(`/api/requests/${id}`, body),
+  submit: (id: T.Uuid) => api.post<unknown>(`/api/requests/${id}/submit`, { declarationConfirmed: true }),
+  withdraw: (id: T.Uuid) => api.post<unknown>(`/api/requests/${id}/withdraw`),
+  upload: (id: T.Uuid, file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return api.post<T.RequestDocumentRow>(`/api/requests/${id}/documents`, form);
+  },
+  deleteDocument: (id: T.Uuid, documentId: T.Uuid) => api.del<void>(`/api/requests/${id}/documents/${documentId}`),
+  downloadDocument: (id: T.Uuid, doc: T.RequestDocumentRow) =>
+    download(`/api/requests/${id}/documents/${doc.id}`, doc.fileName),
+  accept: (id: T.Uuid, body: { committeeId: T.Uuid; contractId?: T.Uuid; procurementOfficerId?: T.Uuid; targetDate?: string; title?: string }) =>
+    api.post<{ fileId: T.Uuid }>(`/api/requests/${id}/accept`, body),
+  returnToRequester: (id: T.Uuid, reason: string) => api.post<unknown>(`/api/requests/${id}/return`, { reason }),
+  forFile: (fileId: T.Uuid) => api.get<T.FileRequestSummary | null>(`/api/files/${fileId}/request`),
 };

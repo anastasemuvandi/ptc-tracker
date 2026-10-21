@@ -18,6 +18,10 @@ export function HomePage() {
   const { me, hasRole } = useSession();
   const q = useQuery({ queryKey: ['dashboard', 'member'], queryFn: dashboards.member, enabled: !hasRole('PLATFORM_ADMIN') });
   if (hasRole('PLATFORM_ADMIN')) return <Navigate to="/platform" replace />;
+  // A requester outside the committee has nothing else here.
+  if (hasRole('REQUESTER') && !me?.committees.length && !hasRole('CBM', 'INSTITUTION_ADMIN', 'READ_ONLY')) {
+    return <Navigate to="/requests" replace />;
+  }
   return (
     <div className="grid gap-4">
       <PageHeader title={t('dashboard.welcome', { name: me?.fullName ?? '' })} subtitle={me?.institution?.name} />

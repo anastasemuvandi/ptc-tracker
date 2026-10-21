@@ -40,6 +40,7 @@ docs/       this file, API.md, OPERATIONS.md
 | `notification`   | Email (guaranteed channel), in-app notifications, Web Push; SMS-ready channel interface. |
 | `reminder`       | Quartz jobs scanning deadlines per institution. |
 | `dashboard`      | Member / Chair / CBM dashboards and reports. |
+| `request`        | Requests from employees outside the committee (requesters onboarded by the institution administrator): drafts, internal supporting documents with a no-bid-content declaration, acceptance as a file or return with a reason. |
 
 ## Rules every module follows
 

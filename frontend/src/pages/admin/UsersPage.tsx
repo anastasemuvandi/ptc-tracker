@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { UserPlus } from 'lucide-react';
 import { identity } from '@/api/endpoints';
-import type { InstitutionRole, Locale, UserRow } from '@/api/types';
+import type { InstitutionRole, Locale, RequesterCategory, UserRow } from '@/api/types';
 import { useMutate } from '@/hooks/useMutate';
 import { PageHeader, QueryState, StatusBadge } from '@/components/app/common';
 import { Card } from '@/components/ui/card';
@@ -16,8 +16,9 @@ import { SimpleSelect } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { daysUntil, formatDate, todayKigali } from '@/lib/time';
 
-const ROLES: InstitutionRole[] = ['INSTITUTION_ADMIN', 'CBM', 'READ_ONLY'];
+const ROLES: InstitutionRole[] = ['INSTITUTION_ADMIN', 'CBM', 'READ_ONLY', 'REQUESTER'];
 export const OFFICES = ['HEAD_OF_INSTITUTION', 'CBM', 'HEAD_OF_FINANCE', 'INTERNAL_AUDITOR', 'LEGAL_ADVISOR', 'LOGISTICS_OFFICER', 'LOWEST_JOB_CATEGORY'];
 
 export function UsersPage() {
@@ -49,7 +50,10 @@ export function UsersPage() {
                     <TableCell className="font-medium">{u.fullName} {u.isProcurementOfficer && <Badge variant="secondary">{t('committee.procurementOfficer')}</Badge>}</TableCell>
                     <TableCell>{u.email}</TableCell>
                     <TableCell>{u.officeHolderCode ? t(`users.offices.${u.officeHolderCode}`, { defaultValue: u.officeHolderCode }) : '—'}</TableCell>
-                    <TableCell>{u.roles.map((r) => t(`roles.${r}`)).join(', ') || '—'}</TableCell>
+                    <TableCell>
+                      {u.roles.map((r) => t(`roles.${r}`)).join(', ') || '—'}
+                      {u.roles.includes('REQUESTER') && <RequesterAccessBadge user={u} />}
+                    </TableCell>
                     <TableCell><StatusBadge ns="users.status" value={u.status} /></TableCell>
                     <TableCell><Button size="sm" variant="outline" onClick={() => setEditing(u)}>{t('common.manage')}</Button></TableCell>
                   </TableRow>
@@ -65,10 +69,56 @@ export function UsersPage() {
   );
 }
 
+/** "Short term until 30 Nov 2026", flagged when access ends soon or has ended. */
+function RequesterAccessBadge({ user }: { user: UserRow }) {
+  const { t, i18n } = useTranslation();
+  if (!user.requesterCategory) return null;
+  const left = user.accessUntil ? daysUntil(user.accessUntil) : null;
+  return (
+    <span className="mt-1 block text-xs">
+      <Badge variant={left !== null && left < 0 ? 'destructive' : left !== null && left <= 14 ? 'warning' : 'outline'}>
+        {user.requesterCategory === 'SHORT_TERM'
+          ? t('users.shortTermUntil', { date: formatDate(user.accessUntil, i18n.language) })
+          : t('users.category.LONG_TERM')}
+      </Badge>
+    </span>
+  );
+}
+
+/** Category and end of access of a requester; short term needs an end date. */
+function RequesterAccessFields({ idPrefix, category, accessUntil, onChange }: {
+  idPrefix: string; category: RequesterCategory | ''; accessUntil: string;
+  onChange: (v: { category: RequesterCategory | ''; accessUntil: string }) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="grid gap-3 rounded-md border p-3 sm:grid-cols-2">
+      <Field id={`${idPrefix}-cat`} label={t('users.requesterCategory')} required>
+        <SimpleSelect id={`${idPrefix}-cat`} value={category} placeholder={t('common.choose')}
+          onChange={(v) => onChange({ category: v as RequesterCategory, accessUntil })}
+          options={(['SHORT_TERM', 'LONG_TERM'] as const).map((c) => ({ value: c, label: t(`users.category.${c}`) }))} />
+      </Field>
+      {category === 'SHORT_TERM' && (
+        <Field id={`${idPrefix}-until`} label={t('users.accessUntil')} hint={t('users.accessUntilHint')} required>
+          <Input id={`${idPrefix}-until`} type="date" min={todayKigali()} value={accessUntil}
+            onChange={(e) => onChange({ category, accessUntil: e.target.value })} />
+        </Field>
+      )}
+      <p className="text-xs text-muted-foreground sm:col-span-2">{t('users.requesterHelp')}</p>
+    </div>
+  );
+}
+
 function InviteDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t } = useTranslation();
   const [f, setF] = React.useState({ email: '', fullName: '', jobTitle: '', officeHolderCode: '', procurementOfficer: false, locale: 'en' as Locale, roles: [] as InstitutionRole[] });
-  const invite = useMutate(() => identity.invite({ ...f, jobTitle: f.jobTitle || undefined, officeHolderCode: f.officeHolderCode || undefined }), {
+  const [access, setAccess] = React.useState<{ category: RequesterCategory | ''; accessUntil: string }>({ category: '', accessUntil: '' });
+  const requester = f.roles.includes('REQUESTER');
+  const accessIncomplete = requester && (!access.category || (access.category === 'SHORT_TERM' && !access.accessUntil));
+  const invite = useMutate(() => identity.invite({
+    ...f, jobTitle: f.jobTitle || undefined, officeHolderCode: f.officeHolderCode || undefined,
+    ...(requester ? { requesterCategory: access.category as RequesterCategory, accessUntil: access.category === 'SHORT_TERM' ? access.accessUntil : undefined } : {}),
+  }), {
     invalidate: [['users']], onSuccess: onClose, success: t('users.invited'),
   });
   return (
@@ -101,10 +151,11 @@ function InviteDialog({ open, onClose }: { open: boolean; onClose: () => void })
             ))}
             <p className="text-xs text-muted-foreground">{t('users.committeeRolesNote')}</p>
           </fieldset>
+          {requester && <RequesterAccessFields idPrefix="iv" category={access.category} accessUntil={access.accessUntil} onChange={setAccess} />}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
-          <Button disabled={!f.email || !f.fullName || invite.isPending} onClick={() => invite.mutate(undefined)}>{t('users.sendInvite')}</Button>
+          <Button disabled={!f.email || !f.fullName || accessIncomplete || invite.isPending} onClick={() => invite.mutate(undefined)}>{t('users.sendInvite')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -122,6 +173,11 @@ function ManageDialog({ user, onClose }: { user: UserRow; onClose: () => void })
   const setStatus = useMutate((s: string) => identity.setStatus(user.id, s), { invalidate: inv, onSuccess: onClose, success: t('common.saved') });
   const resend = useMutate(() => identity.resendInvitation(user.id), { success: t('users.invitationResent') });
   const resetMfa = useMutate(() => identity.resetMfa(user.id), { success: t('users.mfaReset') });
+  const [access, setAccess] = React.useState<{ category: RequesterCategory | ''; accessUntil: string }>(
+    { category: user.requesterCategory ?? '', accessUntil: user.accessUntil ?? '' });
+  const saveAccess = useMutate(() => identity.setRequesterAccess(user.id, {
+    category: access.category as RequesterCategory, accessUntil: access.category === 'SHORT_TERM' ? access.accessUntil : undefined,
+  }), { invalidate: inv, success: t('common.saved') });
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-xl" closeLabel={t('common.close')}>
@@ -138,6 +194,15 @@ function ManageDialog({ user, onClose }: { user: UserRow; onClose: () => void })
             <Button size="sm" variant="outline" className="justify-self-start" onClick={() => saveRoles.mutate(undefined)}>{t('users.saveRoles')}</Button>
             <p className="text-xs text-muted-foreground">{t('users.rolesRevokeNote')}</p>
           </fieldset>
+          {(roles.includes('REQUESTER') || user.requesterCategory) && (
+            <div className="grid gap-2">
+              <p className="text-sm font-medium">{t('users.requesterAccess')}</p>
+              <RequesterAccessFields idPrefix="mg" category={access.category} accessUntil={access.accessUntil} onChange={setAccess} />
+              <Button size="sm" variant="outline" className="justify-self-start"
+                disabled={!access.category || (access.category === 'SHORT_TERM' && !access.accessUntil) || saveAccess.isPending}
+                onClick={() => saveAccess.mutate(undefined)}>{t('users.saveAccess')}</Button>
+            </div>
+          )}
           <div className="grid gap-2">
             <Field id="mg-office" label={t('users.office')}>
               <SimpleSelect id="mg-office" value={office} onChange={setOffice} allowEmpty emptyLabel={t('users.noOffice')} options={OFFICES.map((o) => ({ value: o, label: t(`users.offices.${o}`) }))} />
