@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { files, committees, identity, contracts } from '@/api/endpoints';
 import type { ItemType, NewFile, ProcurementType } from '@/api/types';
 import { useMutate } from '@/hooks/useMutate';
+import { useSession } from '@/hooks/useSession';
 import { PageHeader } from '@/components/app/common';
 import { Card, CardContent } from '@/components/ui/card';
 import { Field } from '@/components/ui/field';
@@ -23,6 +24,7 @@ export function NewFilePage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const presetType = params.get('type');
+  const { committeeRole } = useSession();
   const cs = useQuery({ queryKey: ['committees'], queryFn: committees.list });
   const users = useQuery({ queryKey: ['users'], queryFn: identity.users });
   const cts = useQuery({ queryKey: ['contracts'], queryFn: contracts.list });
@@ -43,7 +45,7 @@ export function NewFilePage() {
           <form className="grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); create.mutate(undefined); }}>
             <Field id="committee" label={t('common.committee')} required>
               <SimpleSelect id="committee" value={f.committeeId} onChange={(v) => set('committeeId', v)} placeholder={t('common.choose')}
-                options={(cs.data ?? []).filter((c) => c.status === 'ACTIVE').map((c) => ({ value: c.id, label: `${c.code} — ${c.name}` }))} />
+                options={(cs.data ?? []).filter((c) => c.status === 'ACTIVE' && (committeeRole(c.id) ?? 'MEMBER') !== 'MEMBER').map((c) => ({ value: c.id, label: `${c.code} — ${c.name}` }))} />
             </Field>
             <Field id="type" label={t('files.type')} hint={t(`itemTypeHelp.${f.itemType}`)} required>
               <SimpleSelect id="type" value={f.itemType} onChange={(v) => set('itemType', v as ItemType)}

@@ -68,15 +68,16 @@ roles[], committees[{committee_id, role}], token_version, sid, amr`.
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/api/committees` | `[{id,name,code,size,status,regulatorAuthRef,regulatorAuthDate,activeMembers,quorumRequired,myRole}]` |
-| POST | `/api/committees` | CBM `{name,code,size,regulatorAuthRef?,regulatorAuthDate?}`; 422 `committee.size_not_allowed`, `committee.regulator_authorisation_required` |
-| GET/PUT | `/api/committees/{id}` | detail + `members[]` (`membershipId,userId,fullName,role,termStart,termEnd,consecutiveTerm,status,isProcurementOfficer`) |
+| GET | `/api/committees` | `[{id,name,code,size,status,regulatorAuthRef,regulatorAuthDate,activeMembers,quorumRequired,myRole,currentPeriod:{id,startsOn,endsOn,closedOn,appointmentRef}}]` |
+| POST | `/api/committees` | CBM `{name,code,size,regulatorAuthRef?,regulatorAuthDate?,periodStart?,appointmentRef?}` opens the first period (end = start + `committee.periodMonths` − 1 day); 422 `committee.size_not_allowed`, `committee.regulator_authorisation_required` |
+| GET/PUT | `/api/committees/{id}` | detail + `members[]` (`membershipId,userId,fullName,role,termStart,termEnd,consecutiveTerm,status,isProcurementOfficer`) and `periods[]` (newest first) |
+| POST | `/api/committees/{id}/periods` | CBM `{startsOn?,appointmentRef?}` reappoints the committee: same name, new period; a running period closes the day before. Active seats end except the Secretary's, which continues into the new period. 422 `committee.period_overlap`, `committee.period_future` |
 | GET | `/api/committees/{id}/composition` | `{compliant, issues:[{code,severity:"ERROR"\|"WARNING",message,params}]}` |
 | GET | `/api/committees/{id}/candidates` | institution users with `eligible` + `ineligibleReason` codes |
 | POST | `/api/committees/{id}/members/check` | dry-run of an appointment → composition result |
-| POST | `/api/committees/{id}/members` | CBM `{userId,role,termStart,termEnd?,appointmentRef?,renewMembershipId?}` (renewal ends the old seat and starts the next consecutive term) → `{membership, warnings[]}`; 422 on `composition.*` |
+| POST | `/api/committees/{id}/members` | CBM `{userId,role,termStart,termEnd?,appointmentRef?,renewMembershipId?}`; `termEnd` defaults to the end of the current period (renewal ends the old seat and starts the next consecutive term) → `{membership, warnings[]}`; 422 on `composition.*` |
 | POST | `/api/committees/{id}/members/{membershipId}/end` | `{reason}` |
-| POST | `/api/committees/{id}/replacements` | CBM `{scope:"SINGLE"\|"ALL", reason, outgoingMembershipIds[], appointments[{userId,role,termStart,termEnd?}]}` → `{replacement, regulatorTask?}` |
+| POST | `/api/committees/{id}/replacements` | CBM `{scope:"SINGLE"\|"ALL", reason, outgoingMembershipIds[], appointments[{userId,role,termStart,termEnd?}]}` → `{replacement, regulatorTask?, period?}`; ALL replaces every member except the Secretary and opens a new period from today |
 | GET | `/api/committees/{id}/replacements` | history |
 | GET | `/api/tasks?status=OPEN` | tracked tasks (regulator notifications, validity extension requests …) |
 | POST | `/api/tasks/{id}/complete` | `{reference,note}` |
@@ -94,7 +95,7 @@ warnings `composition.consecutive_terms_majority`,
 | Method | Path | Notes |
 |---|---|---|
 | GET | `/api/files?committeeId&type&officerId&stage&overdue&procurementType&contractId` | `[{id,fileNumber,itemType,tenderRef,contractId,contractRef,title,procurementType,procurementMethod,procurementOfficerId,officerName,stage,dateReceived,targetDate,overdue,committeeId,committeeCode,bidValidityExpiry}]` |
-| POST | `/api/files` | CBM or committee officer `{committeeId,itemType,tenderRef?,contractId?,title,procurementType?,procurementMethod?,procurementOfficerId?,dateReceived,targetDate?,referralRef?,referralReason?,bidValidityExpiry?}` |
+| POST | `/api/files` | committee officer (Chair, Vice-Chair, Secretary) `{committeeId,itemType,tenderRef?,contractId?,title,procurementType?,procurementMethod?,procurementOfficerId?,dateReceived,targetDate?,referralRef?,referralReason?,bidValidityExpiry?}` |
 | GET | `/api/files/{id}` | detail + `stageHistory[]`, `reassignments[]`, `decisions[]`, `cbmResponses[]`, `allowedStages[]` |
 | PUT | `/api/files/{id}` | edit with `version` |
 | POST | `/api/files/{id}/stage` | `{toStage,note}` |
@@ -119,12 +120,16 @@ warnings `composition.consecutive_terms_majority`,
 |---|---|---|
 | GET | `/api/sessions?committeeId&from&to` | list with `sessionNumber,kind,scheduledAt,status,agendaCount` |
 | POST | `/api/sessions` | officer `{committeeId,kind,scheduledAt,location,shortNoticeReason?}`; 422 `session.short_notice_reason_required` `{earliestWithoutShortNotice}` |
-| GET | `/api/sessions/{id}` | `{session, committee, agenda[], members[], quorum, myRole, myApology}` |
+| GET | `/api/sessions/{id}` | `{session, committee, agenda[] (each with activities[{id,activityCode,status,note,recordedAt,recordedByName,carriedFromId,carriedFromSession}]), members[], quorum, myRole, myApology}` |
 | PUT | `/api/sessions/{id}` | officer, with `version` |
 | GET | `/api/sessions/{id}/quorum` | live quorum |
-| POST | `/api/sessions/{id}/status` | `{status:"IN_PROGRESS"\|"HELD"\|"CANCELLED"}` |
-| POST | `/api/sessions/{id}/agenda` | officer `{fileId?, itemType, adminKind?, adminNote?}`; 422 `agenda.out_of_scope`, `agenda.type_mismatch`, `agenda.file_other_committee` |
-| DELETE | `/api/sessions/{id}/agenda/{itemId}` | |
+| POST | `/api/sessions/{id}/status` | `{status:"IN_PROGRESS"\|"HELD"\|"CANCELLED"}`; HELD 422 `session.activities_unrecorded` while an activity is still PLANNED |
+| POST | `/api/sessions/{id}/agenda` | officer `{fileId?, itemType, adminKind?, adminNote?, activities?:[code]}`; codes from `agenda.activities[itemType]` (type A: the evaluation stage codes); omitted → the file's outstanding activities. 422 `agenda.out_of_scope`, `agenda.type_mismatch`, `agenda.file_other_committee`, `agenda.activity_required`, `agenda.activity_unknown`, `agenda.activity_done` |
+| GET | `/api/sessions/{id}/activity-options?fileId` | officer `{allowed:[code], outstanding:[code]}` |
+| POST | `/api/sessions/{id}/activities/{activityId}` | officer, session IN_PROGRESS `{status:"COMPLETED"\|"NOT_COMPLETED", note?}` (note required when not completed). Type A stage codes complete the evaluation stage (its checks apply) and are completed by it; RECOMMENDATION/A6 complete when voting adopts the recommendation. 422 `activity.session_not_in_progress`, `activity.stage_completed`, `activity.recommendation_not_adopted`; 400 `activity.reason_required` |
+| GET | `/api/sessions/{id}/carry-over` | activities NOT_COMPLETED in earlier HELD sessions of the committee, not yet carried over: `[{id,activityCode,note,fileId,fileNumber,title,itemType,sessionNumber,scheduledAt}]` |
+| POST | `/api/sessions/{id}/carry-over` | officer `{activityIds}` → activities planned on this agenda (item created if needed) with `carriedFromId`; each activity is carried once. 422 `agenda.carry_over_invalid` |
+| DELETE | `/api/sessions/{id}/agenda/{itemId}` | removes its planned activities; 422 `agenda.has_activity_record` once one is recorded |
 | PUT | `/api/sessions/{id}/agenda/order` | `[itemId…]` |
 | PUT | `/api/sessions/{id}/attendance/{membershipId}` | officer `{status, clientRecordedAt, baseVersion?}` → `{attendance, quorum}`; 409 `attendance.conflict` `{server}` |
 | POST | `/api/sessions/{id}/apologies` | self `{kind,reason,clientRecordedAt}` → apology (`timely`) |

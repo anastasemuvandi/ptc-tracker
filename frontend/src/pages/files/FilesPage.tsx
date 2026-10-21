@@ -21,7 +21,7 @@ const PROC = ['WORKS', 'GOODS', 'CONSULTANCY', 'NON_CONSULTANCY'];
 
 export function FilesPage() {
   const { t, i18n } = useTranslation();
-  const { hasRole, isOfficerAnywhere } = useSession();
+  const { isOfficerAnywhere } = useSession();
   const [params, setParams] = useSearchParams();
   const f = {
     committeeId: params.get('committeeId') ?? '',
@@ -49,7 +49,7 @@ export function FilesPage() {
       <PageHeader
         title={t('files.title')}
         subtitle={t('files.subtitle')}
-        actions={(hasRole('CBM') || isOfficerAnywhere) && (
+        actions={isOfficerAnywhere && (
           <Button asChild><Link to="/files/new"><Plus className="h-4 w-4" aria-hidden />{t('files.new')}</Link></Button>
         )}
       />

@@ -7,6 +7,8 @@ Read `docs/ARCHITECTURE.md` (modules, conventions) and `docs/API.md` (HTTP contr
 ## Layout
 
 - `backend/` — Java 21, Spring Boot 3.5, Maven, Flyway, JPA, Quartz, Apache POI, nimbus-jose-jwt. Package `rw.gov.ptc`.
+  Each feature package (`committee`, `file`, `session`, …) is split into `controller/`, `dto/` (request records, one per file), `enums/`, `entity/`, `repository/`, `service/` (interfaces) with `service/impl/` (`XServiceImpl`, holds `@Service` and `@Transactional`), and `component/` (helper beans, constants, jobs). `auth` (api/internal boundary), `common`, `security`, `tenancy` and `idempotency` are infrastructure and keep their flat layout.
+  Closed value sets (statuses, kinds) are enums mapped with `@Enumerated(EnumType.STRING)`, matching the column's CHECK constraint; request DTOs keep them as `String` and services convert with `Enums.parse`, so unknown values raise our own error codes. Configurable values (file stages, notification kinds) stay `String`.
 - `frontend/` — React 18 + TypeScript + Vite, Tailwind, shadcn-style components in `src/components/ui`, i18next (`src/i18n/locales/{en,fr,rw}.json`), Workbox service worker `src/sw.ts`.
 - `deploy/` — docker-compose (db, backend, web), DB role bootstrap, `scripts/generate-secrets.sh`, `scripts/smoke-test.py`.
 - `docs/user-guide/screenshots/` — screenshot sources; the in-app guide is `frontend/src/pages/guide/user-guide.en.md` (served at `/guide`, images in `frontend/public/guide/`).

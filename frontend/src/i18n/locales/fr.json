@@ -449,7 +449,7 @@
   "committee": {
     "accept": "Accepter",
     "addIncoming": "Ajouter un autre membre",
-    "allReplaced": "Tous les membres sont remplacés",
+    "allReplaced": "Tous les membres sauf le secrétaire sont remplacés",
     "appoint": "Nommer un membre",
     "appointHelp": "Les règles de composition sont vérifiées au fur et à mesure ; les blocages doivent être levés.",
     "appointed": "Membre nommé",
@@ -495,7 +495,7 @@
     "tableRequestsHelp": "Demandes des membres pour inscrire un dossier. Le Président accepte ou refuse.",
     "term": "Mandat",
     "termEnd": "Fin du mandat",
-    "termEndHint": "Par défaut, la durée de mandat configurée.",
+    "termEndHint": "Par défaut, la fin de la période du comité.",
     "termEndsIn_one": "Se termine dans {{count}} jour",
     "termEndsIn_other": "Se termine dans {{count}} jours",
     "termStart": "Début du mandat",
@@ -509,7 +509,7 @@
     },
     "scope": {
       "SINGLE": "Remplacer les membres sélectionnés",
-      "ALL": "Remplacer tous les membres"
+      "ALL": "Remplacer tous les membres (sauf le secrétaire)"
     },
     "status": {
       "ACTIVE": "Actif",
@@ -524,7 +524,17 @@
       "PENDING": "En attente",
       "ACCEPTED": "Acceptée",
       "DECLINED": "Refusée"
-    }
+    },
+    "period": "Période",
+    "periods": "Périodes",
+    "periodStart": "Début de la période",
+    "periodStartHint": "La période se termine automatiquement après {{months}} mois.",
+    "newPeriod": "Nouvelle période",
+    "newPeriodHelp": "Reconduire {{name}} pour une nouvelle période. Le comité garde son nom ; la période en cours se clôt la veille. Les sièges des membres prennent fin, sauf celui du secrétaire, qui continue. Tout membre du comité précédent peut être nommé à nouveau.",
+    "noPeriod": "Aucune période enregistrée",
+    "periodLapsed": "Période échue",
+    "periodEndsIn_one": "Se termine dans {{count}} jour",
+    "periodEndsIn_other": "Se termine dans {{count}} jours"
   },
   "composition": {
     "blocked": "Bloquant",
@@ -1295,7 +1305,10 @@
       "forceMajeure.autoCancelDays": "Force majeure avant résiliation automatique (jours)",
       "contract.completionAlertDays": "Alerte avant achèvement du contrat (jours)",
       "framework.expiryAlertDays": "Alerte avant échéance de l'accord-cadre (jours)",
-      "framework.annualEvaluationAlertDays": "Alerte avant l'évaluation annuelle de l'accord-cadre (jours)"
+      "framework.annualEvaluationAlertDays": "Alerte avant l'évaluation annuelle de l'accord-cadre (jours)",
+      "committee.periodMonths": "Durée de la période du comité (mois)",
+      "term.limitBlocks": "Bloquer les nominations au-delà de la limite de renouvellement",
+      "agenda.activities": "Activités pouvant être programmées par type de dossier"
     }
   },
   "audit": {
@@ -1494,7 +1507,9 @@
       "replacement_scope": "Indiquez si un ou tous les membres sont remplacés.",
       "replacement_single": "Sélectionnez les membres remplacés.",
       "size_below_members": "La taille ne peut être inférieure au nombre de membres en fonction.",
-      "size_not_allowed": "Cette taille de comité n'est pas autorisée ({{allowed}})."
+      "size_not_allowed": "Cette taille de comité n'est pas autorisée ({{allowed}}).",
+      "period_overlap": "Une nouvelle période doit commencer après la période en cours.",
+      "period_future": "Une nouvelle période ne peut pas commencer dans le futur."
     },
     "composition": {
       "already_member": "Cette personne siège déjà dans ce comité.",
@@ -1522,7 +1537,8 @@
       "invalid_status": "Statut inconnu.",
       "invalid_transition": "Une séance « {{from}} » ne peut devenir « {{to}} ».",
       "not_planned": "Seule une séance planifiée peut être modifiée.",
-      "short_notice_reason_required": "Cette date est dans le délai de convocation : indiquez le motif du préavis court."
+      "short_notice_reason_required": "Cette date est dans le délai de convocation : indiquez le motif du préavis court.",
+      "activities_unrecorded": "Enregistrez chaque activité comme réalisée ou non avant de clore la séance."
     },
     "agenda": {
       "duplicate": "Ce dossier est déjà à l'ordre du jour.",
@@ -1531,7 +1547,12 @@
       "has_decision": "Ce point a déjà une décision et ne peut être retiré.",
       "invalid_order": "Ordre invalide.",
       "out_of_scope": "Les points de l'ordre du jour doivent être des dossiers de passation d'un type autorisé.",
-      "type_mismatch": "Le type du dossier ne correspond pas au type du point."
+      "type_mismatch": "Le type du dossier ne correspond pas au type du point.",
+      "activity_required": "Choisissez au moins une activité pour ce dossier.",
+      "activity_unknown": "Cette activité n'est pas disponible pour ce type de dossier.",
+      "activity_done": "Cette activité est déjà réalisée pour ce dossier.",
+      "carry_over_invalid": "Choisissez des activités encore en attente de report.",
+      "has_activity_record": "Des activités de ce point sont déjà enregistrées ; il ne peut pas être retiré."
     },
     "attendance": {
       "conflict": "La présence de ce membre a été modifiée plus récemment par quelqu'un d'autre.",
@@ -1761,10 +1782,50 @@
       "uq_push_endpoint": "Cet enregistrement existe déjà.",
       "uq_minutes_ack": "Cet enregistrement existe déjà.",
       "uq_evaluation_stage": "Cet enregistrement existe déjà."
+    },
+    "activity": {
+      "session_not_in_progress": "Les activités s'enregistrent pendant la séance.",
+      "invalid_status": "Enregistrez l'activité comme réalisée ou non réalisée.",
+      "reason_required": "Indiquez pourquoi l'activité n'a pas été réalisée.",
+      "stage_completed": "Cette étape d'évaluation est déjà terminée.",
+      "recommendation_not_adopted": "Cette activité est réalisée lorsque le comité adopte une recommandation par vote."
     }
   },
   "guide": {
     "backToApp": "Retour à l'application",
     "contents": "Sommaire"
+  },
+  "activity": {
+    "code": {
+      "DOCUMENT_REVIEW": "Examen du dossier d'appel d'offres",
+      "AMENDMENT_REVIEW": "Examen de la demande d'avenant",
+      "EXTENSION_REVIEW": "Examen de la demande de prorogation",
+      "PREQUALIFICATION_REVIEW": "Examen de la préqualification",
+      "CANCELLATION_REVIEW": "Examen de la demande d'annulation",
+      "FRAMEWORK_EVALUATION": "Évaluation annuelle de l'accord-cadre",
+      "REFERRAL_REVIEW": "Examen de la question renvoyée",
+      "RECOMMENDATION": "Recommandation (vote)"
+    },
+    "status": {
+      "PLANNED": "Prévue",
+      "COMPLETED": "Réalisée",
+      "NOT_COMPLETED": "Non réalisée"
+    },
+    "toPerform": "Activités à mener lors de cette séance",
+    "alreadyCompleted": "déjà réalisée",
+    "markCompleted": "Réalisée",
+    "markNotCompleted": "Non réalisée",
+    "notCompletedHelp": "Indiquez pourquoi l'activité n'a pas été réalisée. Elle sera proposée pour la prochaine séance du comité.",
+    "recorded": "Activité enregistrée",
+    "carriedFrom": "reportée de {{session}}",
+    "carryOverTitle": "Reportées des séances précédentes",
+    "carryOverHelp": "Ces activités n'ont pas été réalisées. Choisissez celles à reprendre lors de cette séance.",
+    "notCompletedIn": "Non réalisée en {{session}}",
+    "selectAll": "Tout sélectionner",
+    "addToAgenda": "Ajouter à l'ordre du jour",
+    "carriedOver": "Activités ajoutées à l'ordre du jour",
+    "progress": "{{done}} activités réalisées sur {{total}}",
+    "recordBeforeClosing_one": "Enregistrez l'activité restante avant de clore la séance.",
+    "recordBeforeClosing_other": "Enregistrez les {{count}} activités restantes avant de clore la séance."
   }
 }

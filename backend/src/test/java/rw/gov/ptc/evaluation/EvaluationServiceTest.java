@@ -5,7 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import rw.gov.ptc.common.ApiException;
 import rw.gov.ptc.common.Time;
-import rw.gov.ptc.file.ProcFile;
+import rw.gov.ptc.evaluation.dto.AbnormalInput;
+import rw.gov.ptc.evaluation.dto.BidderInput;
+import rw.gov.ptc.evaluation.dto.CureInput;
+import rw.gov.ptc.evaluation.dto.CureItem;
+import rw.gov.ptc.evaluation.service.ChecklistService;
+import rw.gov.ptc.evaluation.service.EvaluationService;
+import rw.gov.ptc.file.entity.ProcFile;
 import rw.gov.ptc.support.Fixtures;
 import rw.gov.ptc.support.IntegrationTest;
 import rw.gov.ptc.support.Owner;
@@ -47,8 +53,8 @@ class EvaluationServiceTest extends IntegrationTest {
         throw new AssertionError("expected ApiException");
     }
 
-    private EvaluationService.BidderInput pass(String ref, Integer rank) {
-        return new EvaluationService.BidderInput(ref, "PASS", null, null, rank, null);
+    private BidderInput pass(String ref, Integer rank) {
+        return new BidderInput(ref, "PASS", null, null, rank, null);
     }
 
     /** Walks a file through A1–A3 and checks every gate on the way. */
@@ -72,12 +78,12 @@ class EvaluationServiceTest extends IntegrationTest {
                     "evaluation.blocker.admin_after_technical_financial");
 
             // A bare "non-compliant" is not a reason.
-            e = apiError(() -> evaluation.recordBidder(file, "A1", new EvaluationService.BidderInput(
+            e = apiError(() -> evaluation.recordBidder(file, "A1", new BidderInput(
                     "BID-3", "FAIL", "BID_SECURITY_OR_DECLARATION", "Non-compliant", null, null)));
             assertThat(e.code()).isEqualTo("evaluation.reason_insufficient");
             evaluation.recordBidder(file, "A1", pass("BID-1", null));
             evaluation.recordBidder(file, "A1", pass("BID-2", null));
-            evaluation.recordBidder(file, "A1", new EvaluationService.BidderInput("BID-3", "FAIL",
+            evaluation.recordBidder(file, "A1", new BidderInput("BID-3", "FAIL",
                     "BID_SECURITY_OR_DECLARATION", "Bid security issued for 30 days, below required validity", null, null));
             evaluation.completeStage(file, "A1", "2 of 3 bidders passed preliminary examination");
 
@@ -103,17 +109,17 @@ class EvaluationServiceTest extends IntegrationTest {
 
             evaluation.startStage(file, "A3");
             // Rejection on abnormal-price grounds without the written exchange is refused.
-            e = apiError(() -> evaluation.createAbnormal(file, new EvaluationService.AbnormalInput("BID-1",
+            e = apiError(() -> evaluation.createAbnormal(file, new AbnormalInput("BID-1",
                     "ABNORMALLY_LOW", null, null, null, null, null, false, "REJECTED", "Too low", null)));
             assertThat(e.code()).isEqualTo("evaluation.abnormal_rejection_without_exchange");
             assertThat(String.valueOf(e.params().get("missing"))).contains("requestRef", "requestDate", "analysis");
 
-            var check = evaluation.createAbnormal(file, new EvaluationService.AbnormalInput("BID-1",
+            var check = evaluation.createAbnormal(file, new AbnormalInput("BID-1",
                     "ABNORMALLY_LOW", null, null, null, null, null, null, "PENDING", null, null));
             e = apiError(() -> evaluation.completeStage(file, "A3", "x"));
             assertThat(blockerCodes(e)).contains("evaluation.blocker.abnormal_price_pending",
                     "evaluation.blocker.arithmetic_check_missing");
-            var rejected = evaluation.updateAbnormal(check.id, new EvaluationService.AbnormalInput("BID-1",
+            var rejected = evaluation.updateAbnormal(check.id, new AbnormalInput("BID-1",
                     "ABNORMALLY_LOW", "PTC/2026/77", Time.today().minusDays(5), "Bidder cites own quarry",
                     Time.today().minusDays(2), "Quarry claim not evidenced; unit rates 40% below market",
                     false, "REJECTED", "Doubt not lifted after written exchange", check.version));
@@ -141,14 +147,14 @@ class EvaluationServiceTest extends IntegrationTest {
             evaluation.completeStage(file, "A3", null);
             evaluation.startStage(file, "A4");
 
-            ApiException e = apiError(() -> evaluation.createCure(file, new EvaluationService.CureInput("BID-9",
-                    List.of(new EvaluationService.CureItem("TAX_CLEARANCE", null, null, null, null)),
+            ApiException e = apiError(() -> evaluation.createCure(file, new CureInput("BID-9",
+                    List.of(new CureItem("TAX_CLEARANCE", null, null, null, null)),
                     LocalDate.of(2026, 12, 23), null, null, null, null, null)));
             assertThat(e.code()).isEqualTo("evaluation.cure_not_first_ranked");
 
             // Wed 23 Dec 2026 + 5 working days: 24, (25 holiday, 26–27 weekend), 28, 29, 30, 31.
-            Map<String, Object> cure = evaluation.createCure(file, new EvaluationService.CureInput("BID-1",
-                    List.of(new EvaluationService.CureItem("TAX_CLEARANCE", null, null, null, null)),
+            Map<String, Object> cure = evaluation.createCure(file, new CureInput("BID-1",
+                    List.of(new CureItem("TAX_CLEARANCE", null, null, null, null)),
                     LocalDate.of(2026, 12, 23), null, null, null, null, null));
             assertThat(cure.get("deadline")).hasToString("2026-12-31");
             assertThat(cure.get("overdue")).isEqualTo(false);

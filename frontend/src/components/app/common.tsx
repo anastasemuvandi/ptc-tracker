@@ -76,7 +76,7 @@ export function StatusBadge({ ns, value }: { ns: string; value: string | null | 
     COMPLETED: 'success', ADOPTED: 'success', ISSUED: 'success', APPROVED: 'success', HELD: 'success', ACTIVE: 'success',
     FINAL: 'success', COMPLIED: 'success', CLARIFIED: 'success', PASS: 'success', DONE: 'success', CLOSED: 'secondary',
     IN_PROGRESS: 'warning', VOTING: 'warning', PENDING: 'warning', IN_REVIEW: 'warning', OPEN: 'warning', PLANNED: 'secondary',
-    NOT_ADOPTED: 'destructive', REJECTED: 'destructive', CANCELLED: 'outline', NOT_COMPLIED: 'destructive', FAIL: 'destructive',
+    NOT_ADOPTED: 'destructive', NOT_COMPLETED: 'destructive', REJECTED: 'destructive', CANCELLED: 'outline', NOT_COMPLIED: 'destructive', FAIL: 'destructive',
     ATTEMPTED_ALTERATION: 'destructive', RETURNED_FOR_CORRECTION: 'destructive', EXPIRED: 'destructive',
   };
   return <Badge variant={tone[value] ?? 'outline'}>{t(`${ns}.${value}`, { defaultValue: value })}</Badge>;

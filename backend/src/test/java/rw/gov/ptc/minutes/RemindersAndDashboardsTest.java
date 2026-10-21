@@ -6,9 +6,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.jdbc.core.JdbcTemplate;
 import rw.gov.ptc.common.ApiException;
 import rw.gov.ptc.common.Time;
-import rw.gov.ptc.dashboard.DashboardController;
-import rw.gov.ptc.notification.NotificationService;
-import rw.gov.ptc.reminder.ReminderScanner;
+import rw.gov.ptc.dashboard.controller.DashboardController;
+import rw.gov.ptc.notification.service.NotificationService;
+import rw.gov.ptc.reminder.service.ReminderScanner;
 import rw.gov.ptc.support.Fixtures;
 import rw.gov.ptc.support.IntegrationTest;
 import rw.gov.ptc.support.Owner;
@@ -31,14 +31,14 @@ class RemindersAndDashboardsTest extends IntegrationTest {
     @Autowired
     NotificationService notifications;
     @Autowired
-    rw.gov.ptc.notification.NotificationController notificationApi;
+    rw.gov.ptc.notification.controller.NotificationController notificationApi;
 
     @Test
     void inAppNotificationsAndPushSubscriptions() {
         MeetingFixture f = new MeetingFixture();
         f.as(f.member, () -> {
             assertThat(notificationApi.vapidPublicKey().get("publicKey")).hasSizeGreaterThan(80);
-            notificationApi.subscribe(new rw.gov.ptc.notification.NotificationController.SubscriptionRequest(
+            notificationApi.subscribe(new rw.gov.ptc.notification.dto.SubscriptionRequest(
                     "https://push.example.invalid/sub/" + f.abbr, Map.of("p256dh", "BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U", "auth", "tBHItJI5svbpez7KI4CCXg")),
                     "test-agent");
             notifications.notify(f.member, "TASK_DUE", List.of("Send report", "2026-11-01"), "/n/task/x", null, null, "t1");

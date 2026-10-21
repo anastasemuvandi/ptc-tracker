@@ -6,6 +6,9 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import rw.gov.ptc.common.ApiException;
+import rw.gov.ptc.minutes.entity.Minutes;
+import rw.gov.ptc.minutes.enums.MinutesStatus;
+import rw.gov.ptc.minutes.service.MinutesService;
 import rw.gov.ptc.support.IntegrationTest;
 import rw.gov.ptc.support.Owner;
 
@@ -109,7 +112,7 @@ class MinutesTest extends IntegrationTest {
             f.as(u, () -> service.acknowledge(id.get(), null));
         }
         f.as(f.secretary, () -> {
-            assertThat(service.finalise(id.get()).status).isEqualTo("FINAL");
+            assertThat(service.finalise(id.get()).status).isEqualTo(MinutesStatus.FINAL);
             assertThatThrownBy(() -> service.generate(f.session)).isInstanceOf(ApiException.class)
                     .satisfies(e -> assertThat(((ApiException) e).code()).isEqualTo("minutes.final"));
             assertThat(service.docx(id.get()).filename()).doesNotContain("DRAFT");

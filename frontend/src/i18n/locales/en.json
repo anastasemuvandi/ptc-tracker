@@ -449,7 +449,7 @@
   "committee": {
     "accept": "Accept",
     "addIncoming": "Add another appointee",
-    "allReplaced": "All members are being replaced",
+    "allReplaced": "All members except the Secretary are being replaced",
     "appoint": "Appoint member",
     "appointHelp": "Composition rules are checked as you choose; blocking issues must be resolved first.",
     "appointed": "Member appointed",
@@ -495,7 +495,7 @@
     "tableRequestsHelp": "Members' requests that a file be tabled. The Chairperson accepts or declines.",
     "term": "Term",
     "termEnd": "Term end",
-    "termEndHint": "Defaults to the configured term length.",
+    "termEndHint": "Defaults to the end of the committee period.",
     "termEndsIn_one": "Ends in {{count}} day",
     "termEndsIn_other": "Ends in {{count}} days",
     "termStart": "Term start",
@@ -509,7 +509,7 @@
     },
     "scope": {
       "SINGLE": "Replace selected members",
-      "ALL": "Replace all members"
+      "ALL": "Replace all members (except the Secretary)"
     },
     "status": {
       "ACTIVE": "Active",
@@ -524,7 +524,17 @@
       "PENDING": "Pending",
       "ACCEPTED": "Accepted",
       "DECLINED": "Declined"
-    }
+    },
+    "period": "Period",
+    "periods": "Periods",
+    "periodStart": "Period start",
+    "periodStartHint": "The period ends automatically after {{months}} months.",
+    "newPeriod": "New period",
+    "newPeriodHelp": "Reappoint {{name}} for a new period. The committee keeps its name; the current period closes the day before. Members' seats end, except the Secretary's, which continues. Anyone from the past committee may be appointed again.",
+    "noPeriod": "No period recorded",
+    "periodLapsed": "Period ended",
+    "periodEndsIn_one": "Ends in {{count}} day",
+    "periodEndsIn_other": "Ends in {{count}} days"
   },
   "composition": {
     "blocked": "Blocked",
@@ -1295,7 +1305,10 @@
       "forceMajeure.autoCancelDays": "Force majeure before automatic cancellation (days)",
       "contract.completionAlertDays": "Alert before contract completion (days)",
       "framework.expiryAlertDays": "Alert before framework expiry (days)",
-      "framework.annualEvaluationAlertDays": "Alert before framework annual evaluation (days)"
+      "framework.annualEvaluationAlertDays": "Alert before framework annual evaluation (days)",
+      "committee.periodMonths": "Committee period (months)",
+      "term.limitBlocks": "Block appointments beyond the renewal limit",
+      "agenda.activities": "Activities that may be scheduled per file type"
     }
   },
   "audit": {
@@ -1494,7 +1507,9 @@
       "replacement_scope": "Choose whether one or all members are replaced.",
       "replacement_single": "Select the members being replaced.",
       "size_below_members": "The size cannot be below the number of active members.",
-      "size_not_allowed": "This committee size is not allowed ({{allowed}})."
+      "size_not_allowed": "This committee size is not allowed ({{allowed}}).",
+      "period_overlap": "A new period must start after the current one.",
+      "period_future": "A new period cannot start in the future."
     },
     "composition": {
       "already_member": "This person already sits on this committee.",
@@ -1522,7 +1537,8 @@
       "invalid_status": "Unknown status.",
       "invalid_transition": "A {{from}} session cannot become {{to}}.",
       "not_planned": "Only a planned session can be changed.",
-      "short_notice_reason_required": "This is inside the notice period: give the reason for short notice."
+      "short_notice_reason_required": "This is inside the notice period: give the reason for short notice.",
+      "activities_unrecorded": "Record every activity as completed or not completed before closing the session."
     },
     "agenda": {
       "duplicate": "This file is already on the agenda.",
@@ -1531,7 +1547,12 @@
       "has_decision": "This item already has a decision and cannot be removed.",
       "invalid_order": "Invalid order.",
       "out_of_scope": "Agenda items must be procurement files of a permitted type.",
-      "type_mismatch": "The file's type does not match the item type."
+      "type_mismatch": "The file's type does not match the item type.",
+      "activity_required": "Choose at least one activity for this file.",
+      "activity_unknown": "This activity is not available for this type of file.",
+      "activity_done": "This activity is already completed for the file.",
+      "carry_over_invalid": "Choose activities still waiting to be carried over.",
+      "has_activity_record": "Activities of this item are already recorded; it cannot be removed."
     },
     "attendance": {
       "conflict": "Attendance for this member was changed more recently by someone else.",
@@ -1761,10 +1782,50 @@
       "uq_push_endpoint": "This record already exists.",
       "uq_minutes_ack": "This record already exists.",
       "uq_evaluation_stage": "This record already exists."
+    },
+    "activity": {
+      "session_not_in_progress": "Activities are recorded while the session is in progress.",
+      "invalid_status": "Record the activity as completed or not completed.",
+      "reason_required": "Say why the activity was not completed.",
+      "stage_completed": "This evaluation stage is already completed.",
+      "recommendation_not_adopted": "This activity completes when the committee adopts a recommendation by vote."
     }
   },
   "guide": {
     "backToApp": "Back to the app",
     "contents": "Contents"
+  },
+  "activity": {
+    "code": {
+      "DOCUMENT_REVIEW": "Review of the tender document",
+      "AMENDMENT_REVIEW": "Review of the amendment request",
+      "EXTENSION_REVIEW": "Review of the extension request",
+      "PREQUALIFICATION_REVIEW": "Review of the prequalification",
+      "CANCELLATION_REVIEW": "Review of the cancellation request",
+      "FRAMEWORK_EVALUATION": "Annual evaluation of the framework",
+      "REFERRAL_REVIEW": "Review of the referred matter",
+      "RECOMMENDATION": "Recommendation (vote)"
+    },
+    "status": {
+      "PLANNED": "Planned",
+      "COMPLETED": "Completed",
+      "NOT_COMPLETED": "Not completed"
+    },
+    "toPerform": "Activities to perform in this session",
+    "alreadyCompleted": "already completed",
+    "markCompleted": "Completed",
+    "markNotCompleted": "Not completed",
+    "notCompletedHelp": "Say why the activity was not completed. It will be offered for the committee's next session.",
+    "recorded": "Activity recorded",
+    "carriedFrom": "carried over from {{session}}",
+    "carryOverTitle": "Carried over from previous sessions",
+    "carryOverHelp": "These activities were not completed. Choose the ones to take up in this session.",
+    "notCompletedIn": "Not completed in {{session}}",
+    "selectAll": "Select all",
+    "addToAgenda": "Add to agenda",
+    "carriedOver": "Activities added to the agenda",
+    "progress": "{{done}} of {{total}} activities completed",
+    "recordBeforeClosing_one": "Record {{count}} remaining activity before closing the session.",
+    "recordBeforeClosing_other": "Record the {{count}} remaining activities before closing the session."
   }
 }

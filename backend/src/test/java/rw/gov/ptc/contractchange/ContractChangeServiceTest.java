@@ -4,6 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import rw.gov.ptc.common.ApiException;
 import rw.gov.ptc.common.Time;
+import rw.gov.ptc.contractchange.dto.AmendmentInput;
+import rw.gov.ptc.contractchange.dto.CostClaimInput;
+import rw.gov.ptc.contractchange.dto.ExtensionInput;
+import rw.gov.ptc.contractchange.service.ContractChangeService;
+import rw.gov.ptc.contractchange.service.ContractTimelineService;
 import rw.gov.ptc.support.Fixtures;
 import rw.gov.ptc.support.IntegrationTest;
 import rw.gov.ptc.support.Owner;
@@ -30,8 +35,8 @@ class ContractChangeServiceTest extends IntegrationTest {
         return Fixtures.tenant("CC" + System.nanoTime() % 1_000_000);
     }
 
-    private static ContractChangeService.AmendmentInput amendment(String value, Boolean affectsSubstance) {
-        return new ContractChangeService.AmendmentInput(new BigDecimal(value), null, "Additional drainage works",
+    private static AmendmentInput amendment(String value, Boolean affectsSubstance) {
+        return new AmendmentInput(new BigDecimal(value), null, "Additional drainage works",
                 affectsSubstance, affectsSubstance == null ? null : "Same works, same site, quantities only",
                 false, true, true, null, null, null);
     }
@@ -112,7 +117,7 @@ class ContractChangeServiceTest extends IntegrationTest {
         Fixtures.Tenant t = tenant();
         UUID ext = file(t, "D", t.contractId(), null);
         LocalDate completion = Time.today().plusDays(100);
-        Map<String, Object> view = asOfficer(t, () -> changes.createExtension(ext, new ContractChangeService.ExtensionInput(
+        Map<String, Object> view = asOfficer(t, () -> changes.createExtension(ext, new ExtensionInput(
                 completion.plusDays(60), "BIDDER_FAULT", "Late mobilisation", Time.today(), null, null, null, null, null)));
         @SuppressWarnings("unchecked")
         Map<String, Object> a = (Map<String, Object>) view.get("assessment");
@@ -122,7 +127,7 @@ class ContractChangeServiceTest extends IntegrationTest {
         assertThat(a.get("extensionDays")).isEqualTo(60L);
 
         Map<String, Object> claim = asOfficer(t, () -> changes.raiseCostClaim(ext,
-                new ContractChangeService.CostClaimInput(new BigDecimal("3000000.00"), null)));
+                new CostClaimInput(new BigDecimal("3000000.00"), null)));
         UUID claimFile = (UUID) claim.get("fileId");
         var row = Owner.jdbc().queryForMap("SELECT f.item_type, a.linked_extension_file_id, a.contract_id FROM proc_file f JOIN amendment_request a ON a.file_id = f.id WHERE f.id = ?", claimFile);
         assertThat(row.get("item_type")).isEqualTo("C");
@@ -137,7 +142,7 @@ class ContractChangeServiceTest extends IntegrationTest {
         Fixtures.Tenant t = tenant();
         UUID ext = file(t, "D", t.contractId(), null);
         LocalDate requested = Time.today().plusDays(160);
-        asOfficer(t, () -> changes.createExtension(ext, new ContractChangeService.ExtensionInput(
+        asOfficer(t, () -> changes.createExtension(ext, new ExtensionInput(
                 requested, "UNFORESEEN_PHYSICAL_CONDITIONS", "Rock encountered", Time.today(), null, null, null, null, null)));
         issueDecision(t, ext, "D", "GRANT_EXTENSION", true);
         Map<String, Object> tl = asOfficer(t, () -> timeline.timeline(t.contractId()));

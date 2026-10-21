@@ -160,7 +160,8 @@ s = sec.call("POST", "/api/sessions", {"committeeId": cid, "kind": "ORDINARY", "
 sid = s["id"]
 r = sec.call("POST", f"/api/sessions/{sid}/agenda", {"itemType": "A", "fileId": f["id"]}, expect=(422,))
 check("agenda item type must match the file type", r["code"].startswith("agenda."))
-item = sec.call("POST", f"/api/sessions/{sid}/agenda", {"itemType": "C", "fileId": f["id"]})
+item = sec.call("POST", f"/api/sessions/{sid}/agenda", {"itemType": "C", "fileId": f["id"],
+                                                         "activities": ["AMENDMENT_REVIEW", "RECOMMENDATION"]})
 sec.call("POST", f"/api/sessions/{sid}/status", {"status": "IN_PROGRESS"})
 view = sec.call("GET", f"/api/sessions/{sid}")
 by_user = {m["userId"]: m["membershipId"] for m in view["members"]}
@@ -209,6 +210,11 @@ cbm.call("POST", f"/api/decisions/{d['id']}/cbm-response", {"response": "APPROVE
 timeline = sec.call("GET", f"/api/contracts/{contract['id']}/timeline")
 check("approved amendment counted in contract timeline", str(timeline["cumulativeApproved"]).startswith("60000000"))
 
+r = sec.call("POST", f"/api/sessions/{sid}/status", {"status": "HELD"}, expect=(422,))
+check("session cannot close with unrecorded activities", r["code"] == "session.activities_unrecorded")
+acts = {a["activityCode"]: a for a in sec.call("GET", f"/api/sessions/{sid}")["agenda"][0]["activities"]}
+check("adopted recommendation completes its activity", acts["RECOMMENDATION"]["status"] == "COMPLETED")
+sec.call("POST", f"/api/sessions/{sid}/activities/{acts['AMENDMENT_REVIEW']['id']}", {"status": "COMPLETED"})
 sec.call("POST", f"/api/sessions/{sid}/status", {"status": "HELD"})
 m = sec.call("POST", f"/api/sessions/{sid}/minutes/generate")
 mid = (m.get("minutes") or m)["id"]

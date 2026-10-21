@@ -21,7 +21,7 @@ const GROUPS: { id: string; prefixes: string[] }[] = [
   { id: 'sessions', prefixes: ['session.', 'quorum.', 'voting.'] },
   { id: 'evaluation', prefixes: ['evaluation.', 'bidSecurity.', 'bidValidity.'] },
   { id: 'contracts', prefixes: ['amendment.', 'extension.', 'forceMajeure.', 'contract.', 'framework.'] },
-  { id: 'workflow', prefixes: ['workflow.', 'recommendation.', 'checklist.'] },
+  { id: 'workflow', prefixes: ['workflow.', 'recommendation.', 'checklist.', 'agenda.'] },
   { id: 'security', prefixes: ['mfa.', 'stepUp.'] },
 ];
 

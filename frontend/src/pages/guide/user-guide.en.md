@@ -63,8 +63,8 @@ What you see in the menu depends on your role. You may hold different roles on d
 | --- | --- | --- |
 | Platform administrator | Creates institutions and invites each one's first administrator; sees operational counts only, never file content | Optional |
 | Institution administrator | Invites users and sets their roles; institution settings, minutes template, rules and thresholds, holidays | Optional |
-| Chief Budget Manager (CBM) | Creates committees, appoints and replaces members, assigns files, responds to recommendations. Never a committee member, never votes | Mandatory |
-| Chairperson / Vice-Chairperson | Run sessions, decide tabling requests, open voting, issue recommendations | Mandatory |
+| Chief Budget Manager (CBM) | Creates committees, appoints and replaces members, reassigns files and assigns their procurement officer, responds to recommendations. Never a committee member, never votes | Mandatory |
+| Chairperson / Vice-Chairperson | Register files, run sessions, decide tabling requests, open voting, issue recommendations | Mandatory |
 | Secretary (procurement officer) | Registers files, schedules sessions, keeps attendance, records evaluation progress, drafts minutes | Mandatory |
 | Member | Declares interests, votes, records dissent, acknowledges minutes, asks for files to be tabled | Set by institution |
 | Read-only (internal audit) | Reads everything in the institution, including the audit log; cannot change anything | Optional |
@@ -92,6 +92,10 @@ The CBM constitutes committees and decides on their recommendations, but is neve
 
 Under **Committees**, create a committee and give its name (e.g. "PTC A"), a short code and its size (5 or 7 by default). Each committee has its own size and therefore its own quorum. If your institution already has an active committee, you must also record the regulator's **authorisation reference and date**, because additional committees need authorisation.
 
+A committee is appointed for a **period** of three years (configurable). Give the period start and the appointment reference when you create the committee; the end date is filled in automatically. The committee keeps its name across periods: when it is appointed again, choose *New period* on the committee page, and the period history is kept under *Periods*. Replacing all members also starts a new period. A badge warns when the period is about to end or has ended.
+
+Members' terms end with the period they are appointed in. When a new period starts, members' seats end, except the Secretary's: the procurement officer is a permanent member and continues automatically. Anyone from the past committee may be appointed again; going beyond the configured number of renewals shows a warning but does not block (an institution can make it blocking in Settings).
+
 ### Appointing members
 
 Open the committee and choose *Appoint member*, picking the person, their role (Chairperson, Vice-Chairperson, Secretary or Member) and the term start; the term end defaults to the configured term length. As you choose, the composition check runs live and explains any problem. The system **blocks** an appointment when:
@@ -108,7 +112,7 @@ It **warns** without blocking when the committee is below its size, has no procu
 
 ### Replacing members
 
-Use *Replace members* to replace one member or the whole committee. A written reason is mandatory, because replacement requires sound reasons. When **all** members are replaced, the system creates a tracked task to notify the regulator within the configured period (7 days by default). Mark it done under **Tasks** with the reference of your letter.
+Use *Replace members* to replace one member or the whole committee (all members except the Secretary). A written reason is mandatory, because replacement requires sound reasons. When **all** members are replaced, the system creates a tracked task to notify the regulator within the configured period (7 days by default). Mark it done under **Tasks** with the reference of your letter.
 
 ### Assigning files
 
@@ -149,6 +153,12 @@ Under **Sessions** choose *New session*: ordinary or extraordinary, date and tim
 ### Building the agenda
 
 Each agenda item must be an open file of the committee, and its type must match the file's type. Free-text items are not possible: other matters come in only as a type H referred matter from the CBM. The one exception is type I, the committee's own business (adopting previous minutes, work planning, member induction), which never carries a recommendation. If the file you need is not listed, use *Register a new file of this type* in the dialog.
+
+When you choose the file, also tick the **activities** the committee will perform on it in this session, for example *Preliminary / eligibility examination* and *Technical evaluation* for a type A file, or *Review of the amendment request* and *Recommendation (vote)* for a type C file. Activities already completed are greyed out; the rest are ticked for you. The list of activities per file type is set by your institution under Settings.
+
+During the session, mark each activity **Completed** or **Not completed**; not completed needs a reason. For type A, the activities are the evaluation stages: completing one here completes the stage in the evaluation (its checks still apply), and completing a stage in the evaluation marks the activity done. The *Recommendation* activity is marked done when the vote adopts the recommendation. The agenda shows how many activities are done, and the session cannot be closed until every activity is recorded.
+
+Activities not completed are offered at the top of the committee's next session under *Carried over from previous sessions*. Tick them and choose *Add to agenda*; the file is added if it is not already there. The minutes list each item's activities and whether they were completed.
 
 ### Attendance and quorum
 

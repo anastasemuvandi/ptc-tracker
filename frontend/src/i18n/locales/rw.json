@@ -449,7 +449,7 @@
   "committee": {
     "accept": "Emera",
     "addIncoming": "Ongeraho undi ushyirwaho",
-    "allReplaced": "Abanyamuryango bose barasimburwa",
+    "allReplaced": "Abanyamuryango bose basimbuzwa uretse Umunyamabanga",
     "appoint": "Shyiraho umunyamuryango",
     "appointHelp": "Amategeko agenga imiterere ya komite agenzurwa uko uhitamo; ibibuza bigomba kubanza gukemurwa.",
     "appointed": "Umunyamuryango yashyizweho",
@@ -495,7 +495,7 @@
     "tableRequestsHelp": "Ubusabe bw'abanyamuryango bwo kwiga dosiye. Perezida arabwemera cyangwa akabwanga.",
     "term": "Manda",
     "termEnd": "Iherezo rya manda",
-    "termEndHint": "Ku buryo busanzwe ni igihe cya manda cyagenwe.",
+    "termEndHint": "Ku buryo busanzwe irangirana na manda ya komite.",
     "termEndsIn_one": "Irangira mu munsi {{count}}",
     "termEndsIn_other": "Irangira mu minsi {{count}}",
     "termStart": "Intangiriro ya manda",
@@ -509,7 +509,7 @@
     },
     "scope": {
       "SINGLE": "Simbuza abatoranyijwe",
-      "ALL": "Simbuza bose"
+      "ALL": "Gusimbuza abanyamuryango bose (uretse Umunyamabanga)"
     },
     "status": {
       "ACTIVE": "Irakora",
@@ -524,7 +524,17 @@
       "PENDING": "Bitegereje",
       "ACCEPTED": "Byemewe",
       "DECLINED": "Byanzwe"
-    }
+    },
+    "period": "Igihe cya manda",
+    "periods": "Ibihe bya manda",
+    "periodStart": "Itangira rya manda",
+    "periodStartHint": "Manda irangira ubwayo nyuma y'amezi {{months}}.",
+    "newPeriod": "Manda nshya",
+    "newPeriodHelp": "Ongera ushyireho {{name}} kuri manda nshya. Komite igumana izina ryayo; manda iriho irangira ku munsi ubanziriza. Imyanya y'abanyamuryango irarangira, uretse iy'Umunyamabanga ikomeza. Uwari muri komite ishize ashobora kongera gushyirwaho.",
+    "noPeriod": "Nta manda yanditswe",
+    "periodLapsed": "Manda yarangiye",
+    "periodEndsIn_one": "Irangira mu munsi {{count}}",
+    "periodEndsIn_other": "Irangira mu minsi {{count}}"
   },
   "composition": {
     "blocked": "Birabujijwe",
@@ -1295,7 +1305,10 @@
       "forceMajeure.autoCancelDays": "Impamvu nkomezamubiri mbere yo gusesa ku buryo bwikora (iminsi)",
       "contract.completionAlertDays": "Kuburira mbere y'iherezo ry'amasezerano (iminsi)",
       "framework.expiryAlertDays": "Kuburira mbere y'iherezo ry'amasezerano y'urwego (iminsi)",
-      "framework.annualEvaluationAlertDays": "Kuburira mbere y'isuzuma ngarukamwaka ry'amasezerano y'urwego (iminsi)"
+      "framework.annualEvaluationAlertDays": "Kuburira mbere y'isuzuma ngarukamwaka ry'amasezerano y'urwego (iminsi)",
+      "committee.periodMonths": "Igihe cya manda ya komite (amezi)",
+      "term.limitBlocks": "Kubuza ishyirwaho rirenze umubare w'ivugururwa wemewe",
+      "agenda.activities": "Ibikorwa bishobora gutegurwa kuri buri bwoko bwa dosiye"
     }
   },
   "audit": {
@@ -1494,7 +1507,9 @@
       "replacement_scope": "Hitamo niba hasimburwa umwe cyangwa bose.",
       "replacement_single": "Hitamo abanyamuryango basimburwa.",
       "size_below_members": "Ingano ntishobora kujya munsi y'umubare w'abanyamuryango bari mu nshingano.",
-      "size_not_allowed": "Iyi ngano ya komite ntiyemewe ({{allowed}})."
+      "size_not_allowed": "Iyi ngano ya komite ntiyemewe ({{allowed}}).",
+      "period_overlap": "Manda nshya igomba gutangira nyuma y'iriho.",
+      "period_future": "Manda nshya ntishobora gutangira mu gihe kizaza."
     },
     "composition": {
       "already_member": "Uyu muntu asanzwe ari muri iyi komite.",
@@ -1522,7 +1537,8 @@
       "invalid_status": "Imiterere itazwi.",
       "invalid_transition": "Inama iri \"{{from}}\" ntishobora guhinduka \"{{to}}\".",
       "not_planned": "Inama iteganyijwe ni yo yonyine ishobora guhindurwa.",
-      "short_notice_reason_required": "Iyi tariki iri mu gihe cyo gutumiza: tanga impamvu yo gutumiza mu gihe gito."
+      "short_notice_reason_required": "Iyi tariki iri mu gihe cyo gutumiza: tanga impamvu yo gutumiza mu gihe gito.",
+      "activities_unrecorded": "Andika buri gikorwa ko cyakozwe cyangwa kitakozwe mbere yo gusoza inama."
     },
     "agenda": {
       "duplicate": "Iyi dosiye isanzwe iri ku murongo w'ibyigwa.",
@@ -1531,7 +1547,12 @@
       "has_decision": "Iyi ngingo ifite icyemezo, ntishobora gukurwaho.",
       "invalid_order": "Uko bikurikirana ntibikwiye.",
       "out_of_scope": "Ingingo ziri ku murongo w'ibyigwa zigomba kuba dosiye z'amasoko z'ubwoko bwemewe.",
-      "type_mismatch": "Ubwoko bwa dosiye ntibuhura n'ubwoko bw'ingingo."
+      "type_mismatch": "Ubwoko bwa dosiye ntibuhura n'ubwoko bw'ingingo.",
+      "activity_required": "Hitamo nibura igikorwa kimwe kuri iyi dosiye.",
+      "activity_unknown": "Iki gikorwa ntikiboneka kuri ubu bwoko bwa dosiye.",
+      "activity_done": "Iki gikorwa cyarakozwe kuri iyi dosiye.",
+      "carry_over_invalid": "Hitamo ibikorwa bigitegereje kwimurwa.",
+      "has_activity_record": "Ibikorwa by'iyi ngingo byaranditswe; ntishobora gukurwaho."
     },
     "attendance": {
       "conflict": "Ubwitabire bw'uyu munyamuryango bwahinduwe n'undi muntu nyuma.",
@@ -1761,10 +1782,50 @@
       "uq_push_endpoint": "Iyi nyandiko isanzweho.",
       "uq_minutes_ack": "Iyi nyandiko isanzweho.",
       "uq_evaluation_stage": "Iyi nyandiko isanzweho."
+    },
+    "activity": {
+      "session_not_in_progress": "Ibikorwa byandikwa inama irimo kuba.",
+      "invalid_status": "Andika ko igikorwa cyakozwe cyangwa kitakozwe.",
+      "reason_required": "Sobanura impamvu igikorwa kitakozwe.",
+      "stage_completed": "Iki cyiciro cy'isuzuma cyarangiye.",
+      "recommendation_not_adopted": "Iki gikorwa kirangira komite yemeje icyemezo binyuze mu matora."
     }
   },
   "guide": {
     "backToApp": "Subira muri porogaramu",
     "contents": "Ibirimo"
+  },
+  "activity": {
+    "code": {
+      "DOCUMENT_REVIEW": "Gusuzuma inyandiko y'ipiganwa",
+      "AMENDMENT_REVIEW": "Gusuzuma ubusabe bwo guhindura amasezerano",
+      "EXTENSION_REVIEW": "Gusuzuma ubusabe bwo kongera igihe",
+      "PREQUALIFICATION_REVIEW": "Gusuzuma ijonjora ry'ibanze",
+      "CANCELLATION_REVIEW": "Gusuzuma ubusabe bwo guhagarika ipiganwa",
+      "FRAMEWORK_EVALUATION": "Isuzuma ry'umwaka ry'amasezerano y'igihe kirekire",
+      "REFERRAL_REVIEW": "Gusuzuma ikibazo cyoherejwe",
+      "RECOMMENDATION": "Icyemezo (amatora)"
+    },
+    "status": {
+      "PLANNED": "Giteganyijwe",
+      "COMPLETED": "Cyakozwe",
+      "NOT_COMPLETED": "Ntigikozwe"
+    },
+    "toPerform": "Ibikorwa bizakorwa muri iyi nama",
+    "alreadyCompleted": "cyarakozwe",
+    "markCompleted": "Cyakozwe",
+    "markNotCompleted": "Ntigikozwe",
+    "notCompletedHelp": "Sobanura impamvu igikorwa kitakozwe. Kizatangwa mu nama ikurikira ya komite.",
+    "recorded": "Igikorwa cyanditswe",
+    "carriedFrom": "cyimuriwe kuva muri {{session}}",
+    "carryOverTitle": "Ibyimuriwe kuva mu nama zabanje",
+    "carryOverHelp": "Ibi bikorwa ntibyakozwe. Hitamo ibyo kwigwa muri iyi nama.",
+    "notCompletedIn": "Ntigikozwe muri {{session}}",
+    "selectAll": "Hitamo byose",
+    "addToAgenda": "Shyira ku murongo w'ibyigwa",
+    "carriedOver": "Ibikorwa byashyizwe ku murongo w'ibyigwa",
+    "progress": "Ibikorwa {{done}} kuri {{total}} byakozwe",
+    "recordBeforeClosing_one": "Andika igikorwa {{count}} gisigaye mbere yo gusoza inama.",
+    "recordBeforeClosing_other": "Andika ibikorwa {{count}} bisigaye mbere yo gusoza inama."
   }
 }

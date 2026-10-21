@@ -14,6 +14,7 @@ import { useOnline } from '@/hooks/useOnline';
 import { ItemTypeBadge, PageHeader, QueryState, StatusBadge } from '@/components/app/common';
 import { QuorumIndicator } from '@/components/domain/QuorumIndicator';
 import { AttendanceToggle } from '@/components/domain/AttendanceToggle';
+import { ActivityList, ActivityPicker, CarryOverCard, activityProgress } from '@/components/domain/AgendaActivities';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -67,6 +68,8 @@ function SessionView({ detail }: { detail: SessionDetail }) {
 
   const setStatus = useMutate((status: string) => sessions.setStatus(session.id, status), { invalidate: [['session', session.id]] });
   const removeItem = useMutate((itemId: string) => sessions.removeAgendaItem(session.id, itemId), { invalidate: [['session', session.id]] });
+  const progress = activityProgress(agenda);
+  const open = session.status === 'PLANNED' || session.status === 'IN_PROGRESS';
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -88,10 +91,15 @@ function SessionView({ detail }: { detail: SessionDetail }) {
         <QuorumIndicator quorum={quorum} />
       </div>
 
+      {isOfficer && open && <CarryOverCard detail={detail} />}
+
       {/* Agenda ---------------------------------------------------------- */}
       <Card className="mb-4">
         <CardHeader className="flex-row items-center justify-between space-y-0">
-          <CardTitle>{t('sessions.agenda')}</CardTitle>
+          <div>
+            <CardTitle>{t('sessions.agenda')}</CardTitle>
+            {progress.total > 0 && <p className="text-sm text-muted-foreground">{t('activity.progress', { done: progress.done, total: progress.total })}</p>}
+          </div>
           {isOfficer && session.status !== 'HELD' && session.status !== 'CANCELLED' && (
             <Button size="sm" onClick={() => setAddOpen(true)}><Plus className="h-4 w-4" aria-hidden />{t('sessions.addItem')}</Button>
           )}
@@ -100,7 +108,8 @@ function SessionView({ detail }: { detail: SessionDetail }) {
           {agenda.length === 0 && <p className="text-sm text-muted-foreground">{t('sessions.noAgenda')}</p>}
           <ol className="grid gap-2">
             {[...agenda].sort((a, b) => a.position - b.position).map((item) => (
-              <li key={item.id} className="flex min-w-0 items-stretch gap-1 rounded-md border">
+              <li key={item.id} className="min-w-0 rounded-md border">
+                <div className="flex min-w-0 items-stretch gap-1">
                 <Link to={item.itemType === 'I' ? '#' : `/sessions/${session.id}/items/${item.id}`}
                   className="flex min-h-[56px] min-w-0 flex-1 items-center gap-3 p-3 hover:bg-muted"
                   onClick={(e) => item.itemType === 'I' && e.preventDefault()}>
@@ -121,6 +130,8 @@ function SessionView({ detail }: { detail: SessionDetail }) {
                     <Trash2 className="h-4 w-4" aria-hidden />
                   </Button>
                 )}
+                </div>
+                <ActivityList sessionId={session.id} item={item} canRecord={isOfficer && session.status === 'IN_PROGRESS'} />
               </li>
             ))}
           </ol>
@@ -171,7 +182,10 @@ function SessionView({ detail }: { detail: SessionDetail }) {
           <CardHeader><CardTitle>{t('sessions.manage')}</CardTitle></CardHeader>
           <CardContent className="flex flex-wrap gap-2">
             {session.status === 'PLANNED' && <Button onClick={() => setStatus.mutate('IN_PROGRESS')}>{t('sessions.open')}</Button>}
-            {session.status === 'IN_PROGRESS' && <Button onClick={() => setStatus.mutate('HELD')}>{t('sessions.close')}</Button>}
+            {session.status === 'IN_PROGRESS' && <Button disabled={progress.planned > 0} onClick={() => setStatus.mutate('HELD')}>{t('sessions.close')}</Button>}
+            {session.status === 'IN_PROGRESS' && progress.planned > 0 && (
+              <p className="w-full text-sm text-muted-foreground">{t('activity.recordBeforeClosing', { count: progress.planned })}</p>
+            )}
             {session.status === 'PLANNED' && (
               <Button variant="outline" onClick={() => window.confirm(t('sessions.cancelConfirm')) && setStatus.mutate('CANCELLED')}>{t('sessions.cancel')}</Button>
             )}
@@ -246,6 +260,7 @@ function AddAgendaItemDialog({ open, onOpenChange, detail }: { open: boolean; on
   const [fileId, setFileId] = React.useState('');
   const [adminKind, setAdminKind] = React.useState('ADOPT_MINUTES');
   const [adminNote, setAdminNote] = React.useState('');
+  const [activities, setActivities] = React.useState<string[]>([]);
   const fileList = useQuery({
     queryKey: ['files', { committeeId: detail.committee.id, type: itemType }],
     queryFn: () => files.list({ committeeId: detail.committee.id, type: itemType }),
@@ -254,8 +269,8 @@ function AddAgendaItemDialog({ open, onOpenChange, detail }: { open: boolean; on
   const add = useMutate(
     () => sessions.addAgendaItem(detail.session.id, itemType === 'I'
       ? { itemType, adminKind, adminNote: adminNote || undefined }
-      : { itemType, fileId }),
-    { invalidate: [['session', detail.session.id]], onSuccess: () => onOpenChange(false), success: t('sessions.itemAdded') },
+      : { itemType, fileId, activities }),
+    { invalidate: [['session', detail.session.id]], onSuccess: () => { onOpenChange(false); setFileId(''); setActivities([]); }, success: t('sessions.itemAdded') },
   );
   const candidates = (fileList.data ?? []).filter((f) => !['CLOSED'].includes(f.stage));
   return (
@@ -295,10 +310,11 @@ function AddAgendaItemDialog({ open, onOpenChange, detail }: { open: boolean; on
               )}
             </Field>
           )}
+          {itemType !== 'I' && fileId && <ActivityPicker sessionId={detail.session.id} fileId={fileId} value={activities} onChange={setActivities} />}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>{t('common.cancel')}</Button>
-          <Button disabled={add.isPending || (itemType !== 'I' && !fileId)} onClick={() => add.mutate(undefined)}>{t('sessions.addItem')}</Button>
+          <Button disabled={add.isPending || (itemType !== 'I' && (!fileId || activities.length === 0))} onClick={() => add.mutate(undefined)}>{t('sessions.addItem')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

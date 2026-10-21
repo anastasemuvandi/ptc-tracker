@@ -15,6 +15,7 @@ import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { SimpleSelect } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { PeriodLabel } from './PeriodLabel';
 
 export function CommitteesPage() {
   const { t } = useTranslation();
@@ -37,6 +38,7 @@ export function CommitteesPage() {
                       <StatusBadge ns="committee.status" value={c.status} />
                     </div>
                     <p className="text-sm text-muted-foreground">{c.name}</p>
+                    <p className="text-sm">{t('committee.period')}: <PeriodLabel period={c.currentPeriod} /></p>
                   </CardHeader>
                   <CardContent className="grid gap-1 text-sm">
                     <p>{t('committee.membersOfSize', { members: c.activeMembers, size: c.size })}</p>
@@ -66,8 +68,12 @@ function CreateCommitteeDialog({ open, onClose, existing }: { open: boolean; onC
   const [size, setSize] = React.useState(String(sizes[0] ?? 5));
   const [ref, setRef] = React.useState('');
   const [date, setDate] = React.useState('');
+  const [periodStart, setPeriodStart] = React.useState('');
+  const [appointmentRef, setAppointmentRef] = React.useState('');
+  const months = Number(cfg.data?.values['committee.periodMonths'] ?? 36);
   const needsAuth = existing >= 1;
-  const create = useMutate(() => committees.create({ name, code, size: Number(size), regulatorAuthRef: ref || undefined, regulatorAuthDate: date || undefined }),
+  const create = useMutate(() => committees.create({ name, code, size: Number(size), regulatorAuthRef: ref || undefined, regulatorAuthDate: date || undefined,
+    periodStart: periodStart || undefined, appointmentRef: appointmentRef || undefined }),
     { invalidate: [['committees']], onSuccess: onClose, success: t('committee.created') });
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -82,6 +88,10 @@ function CreateCommitteeDialog({ open, onClose, existing }: { open: boolean; onC
           <Field id="cm-size" label={t('committee.size')} hint={t('committee.sizeHint', { sizes: sizes.join(', '), minimum })}>
             <SimpleSelect id="cm-size" value={size} onChange={setSize} options={options.map((s) => ({ value: String(s), label: String(s) }))} />
           </Field>
+          <Field id="cm-start" label={t('committee.periodStart')} hint={t('committee.periodStartHint', { months })}>
+            <Input id="cm-start" type="date" value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} />
+          </Field>
+          <Field id="cm-appref" label={t('committee.appointmentRef')}><Input id="cm-appref" value={appointmentRef} onChange={(e) => setAppointmentRef(e.target.value)} /></Field>
           {needsAuth && <Alert variant="warning"><AlertDescription>{t('committee.authorisationRequired')}</AlertDescription></Alert>}
           <Field id="cm-ref" label={t('committee.regulatorAuthRef')} required={needsAuth}><Input id="cm-ref" value={ref} onChange={(e) => setRef(e.target.value)} /></Field>
           <Field id="cm-date" label={t('committee.regulatorAuthDate')} required={needsAuth}><Input id="cm-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>

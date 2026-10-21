@@ -11,8 +11,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.support.TransactionTemplate;
 import rw.gov.ptc.auth.api.IdentityAdmin;
 import rw.gov.ptc.auth.api.InstitutionRole;
-import rw.gov.ptc.auth.internal.TestActors;
 import rw.gov.ptc.auth.internal.TestActors.Actor;
+import rw.gov.ptc.auth.internal.TestActors;
+import rw.gov.ptc.decision.entity.Decision;
+import rw.gov.ptc.decision.repository.DecisionRepository;
 import rw.gov.ptc.support.IntegrationTest;
 import rw.gov.ptc.support.TestBeans;
 import rw.gov.ptc.tenancy.TenantContext;
@@ -96,6 +98,9 @@ class SessionDecisionFlowTest extends IntegrationTest {
         String contract = call(actors.post_(sec, Map.of("contractRef", "CT-2026-001", "title", "Road works",
                 "procurementType", "WORKS", "currency", "RWF", "originalValue", "1000000000.00",
                 "originalCompletionDate", "2027-06-30"), "/api/contracts")).get("id").asText();
+        // Files are registered by the committee's officers, not by the CBM.
+        mvc.perform(actors.post_(cbm, Map.of("committeeId", committee, "itemType", "B", "title", "Tender document"), "/api/files"))
+                .andExpect(status().isForbidden());
         mvc.perform(actors.post_(sec, Map.of("committeeId", committee, "itemType", "C", "title", "Addendum 1"), "/api/files"))
                 .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.code").value("file.contract_required"));
         JsonNode fileC = call(actors.post_(sec, Map.of("committeeId", committee, "itemType", "C", "title", "Addendum 1",

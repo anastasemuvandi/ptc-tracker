@@ -137,6 +137,13 @@ export interface PlatformMetric {
 }
 
 // ------------------------------------------------------------ committees
+export interface CommitteePeriod {
+  id: Uuid;
+  startsOn: IsoDate;
+  endsOn: IsoDate;
+  closedOn: IsoDate | null;
+  appointmentRef: string | null;
+}
 export interface CommitteeSummary {
   id: Uuid;
   name: string;
@@ -148,6 +155,7 @@ export interface CommitteeSummary {
   activeMembers: number;
   quorumRequired: number;
   myRole: CommitteeRole | null;
+  currentPeriod: CommitteePeriod | null;
   version?: number;
 }
 export interface CommitteeMember {
@@ -163,6 +171,7 @@ export interface CommitteeMember {
 }
 export interface CommitteeDetail extends CommitteeSummary {
   members: CommitteeMember[];
+  periods: CommitteePeriod[];
 }
 export interface RuleIssue {
   code: string;
@@ -370,6 +379,30 @@ export interface AgendaItem {
   status: 'PENDING' | 'DISCUSSED' | 'DEFERRED';
   decisionId?: Uuid | null;
   decisionStatus?: string | null;
+  activities: AgendaActivity[];
+}
+export type ActivityStatus = 'PLANNED' | 'COMPLETED' | 'NOT_COMPLETED';
+export interface AgendaActivity {
+  id: Uuid;
+  agendaItemId: Uuid;
+  activityCode: string;
+  status: ActivityStatus;
+  note: string | null;
+  recordedAt: IsoInstant | null;
+  recordedByName: string | null;
+  carriedFromId: Uuid | null;
+  carriedFromSession: string | null;
+}
+export interface CarryOverCandidate {
+  id: Uuid;
+  activityCode: string;
+  note: string;
+  fileId: Uuid;
+  fileNumber: string;
+  title: string;
+  itemType: ItemType;
+  sessionNumber: string;
+  scheduledAt: IsoInstant;
 }
 export interface Apology {
   kind: 'ABSENT_WITH_PERMISSION' | 'ON_LEAVE';

@@ -126,10 +126,12 @@ export const platform = {
 // ------------------------------------------------------------ committees
 export const committees = {
   list: () => api.get<T.CommitteeSummary[]>('/api/committees'),
-  create: (body: { name: string; code: string; size: number; regulatorAuthRef?: string; regulatorAuthDate?: string }) =>
+  create: (body: { name: string; code: string; size: number; regulatorAuthRef?: string; regulatorAuthDate?: string; periodStart?: string; appointmentRef?: string }) =>
     api.post<T.CommitteeSummary>('/api/committees', body),
   get: (id: T.Uuid) => api.get<T.CommitteeDetail>(`/api/committees/${id}`),
   update: (id: T.Uuid, body: Record<string, unknown>) => api.put<T.CommitteeDetail>(`/api/committees/${id}`, body),
+  reappoint: (id: T.Uuid, body: { startsOn?: string; appointmentRef?: string }) =>
+    api.post<T.CommitteePeriod>(`/api/committees/${id}/periods`, body),
   composition: (id: T.Uuid) => api.get<T.CompositionResult>(`/api/committees/${id}/composition`),
   candidates: (id: T.Uuid) => api.get<T.Candidate[]>(`/api/committees/${id}/candidates`),
   checkAppointment: (id: T.Uuid, body: T.Appointment) =>
@@ -218,8 +220,14 @@ export const sessions = {
   get: (id: T.Uuid) => api.get<T.SessionDetail>(`/api/sessions/${id}`),
   update: (id: T.Uuid, body: Record<string, unknown>) => api.put<T.SessionRow>(`/api/sessions/${id}`, body),
   setStatus: (id: T.Uuid, status: string) => api.post<T.SessionRow>(`/api/sessions/${id}/status`, { status }),
-  addAgendaItem: (id: T.Uuid, body: { fileId?: T.Uuid; itemType: T.ItemType; adminKind?: string; adminNote?: string }) =>
+  addAgendaItem: (id: T.Uuid, body: { fileId?: T.Uuid; itemType: T.ItemType; adminKind?: string; adminNote?: string; activities?: string[] }) =>
     api.post<T.AgendaItem>(`/api/sessions/${id}/agenda`, body),
+  activityOptions: (id: T.Uuid, fileId: T.Uuid) =>
+    api.get<{ allowed: string[]; outstanding: string[] }>(`/api/sessions/${id}/activity-options${qs({ fileId })}`),
+  recordActivity: (id: T.Uuid, activityId: T.Uuid, body: { status: 'COMPLETED' | 'NOT_COMPLETED'; note?: string }) =>
+    api.post<T.AgendaActivity>(`/api/sessions/${id}/activities/${activityId}`, body),
+  carryOverCandidates: (id: T.Uuid) => api.get<T.CarryOverCandidate[]>(`/api/sessions/${id}/carry-over`),
+  carryOver: (id: T.Uuid, activityIds: T.Uuid[]) => api.post<T.AgendaActivity[]>(`/api/sessions/${id}/carry-over`, { activityIds }),
   removeAgendaItem: (id: T.Uuid, itemId: T.Uuid) => api.del<void>(`/api/sessions/${id}/agenda/${itemId}`),
   reorderAgenda: (id: T.Uuid, itemIds: T.Uuid[]) => api.put<void>(`/api/sessions/${id}/agenda/order`, itemIds),
 };

@@ -2,11 +2,12 @@ import * as React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { UserPlus, Users } from 'lucide-react';
+import { CalendarPlus, UserPlus, Users } from 'lucide-react';
 import { committees, files, sessions } from '@/api/endpoints';
 import type { Appointment, CommitteeDetail, CommitteeRole, CompositionResult } from '@/api/types';
 import { useSession } from '@/hooks/useSession';
 import { useMutate } from '@/hooks/useMutate';
+import { useConfig } from '@/lib/config';
 import { PageHeader, QueryState, StatusBadge } from '@/components/app/common';
 import { Card, CardContent, CardHeader, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { daysUntil, formatDate, formatInstant, todayKigali } from '@/lib/time';
 import { CompositionIssues } from './CompositionIssues';
+import { PeriodLabel } from './PeriodLabel';
 
 const ROLES: CommitteeRole[] = ['CHAIRPERSON', 'VICE_CHAIRPERSON', 'SECRETARY', 'MEMBER'];
 
@@ -41,6 +43,7 @@ function CommitteeView({ c }: { c: CommitteeDetail }) {
   const composition = useQuery({ queryKey: ['composition', c.id], queryFn: () => committees.composition(c.id) });
   const [appointOpen, setAppointOpen] = React.useState(false);
   const [replaceOpen, setReplaceOpen] = React.useState(false);
+  const [periodOpen, setPeriodOpen] = React.useState(false);
   const [ending, setEnding] = React.useState<string | null>(null);
   const active = c.members.filter((m) => m.status === 'ACTIVE');
   return (
@@ -50,13 +53,17 @@ function CommitteeView({ c }: { c: CommitteeDetail }) {
         actions={isCbm && <>
           <Button onClick={() => setAppointOpen(true)}><UserPlus className="h-4 w-4" aria-hidden />{t('committee.appoint')}</Button>
           <Button variant="outline" onClick={() => setReplaceOpen(true)}><Users className="h-4 w-4" aria-hidden />{t('committee.replace')}</Button>
+          <Button variant="outline" onClick={() => setPeriodOpen(true)}><CalendarPlus className="h-4 w-4" aria-hidden />{t('committee.newPeriod')}</Button>
         </>} />
+      <p className="text-sm">{t('committee.period')}: <PeriodLabel period={c.currentPeriod} />
+        {c.currentPeriod?.appointmentRef && <span className="text-muted-foreground"> · {c.currentPeriod.appointmentRef}</span>}</p>
       {c.regulatorAuthRef && <p className="text-sm text-muted-foreground">{t('committee.authorisationFull', { ref: c.regulatorAuthRef, date: formatDate(c.regulatorAuthDate, i18n.language) })}</p>}
       <Tabs defaultValue="members">
         <TabsList>
           <TabsTrigger value="members">{t('committee.members')}</TabsTrigger>
           <TabsTrigger value="composition">{t('composition.title')}</TabsTrigger>
           {(isChair || isCbm) && <TabsTrigger value="requests">{t('committee.tableRequests')}</TabsTrigger>}
+          <TabsTrigger value="periods">{t('committee.periods')}</TabsTrigger>
           {isCbm && <TabsTrigger value="replacements">{t('committee.replacements')}</TabsTrigger>}
         </TabsList>
         <TabsContent value="members">
@@ -99,11 +106,13 @@ function CommitteeView({ c }: { c: CommitteeDetail }) {
           <Card><CardContent className="pt-5"><QueryState query={composition}>{(r) => <CompositionIssues result={r} />}</QueryState></CardContent></Card>
         </TabsContent>
         {(isChair || isCbm) && <TabsContent value="requests"><TableRequests committeeId={c.id} canDecide={isChair} /></TabsContent>}
+        <TabsContent value="periods"><Periods c={c} /></TabsContent>
         {isCbm && <TabsContent value="replacements"><Replacements committeeId={c.id} /></TabsContent>}
       </Tabs>
       {isCbm && <AppointDialog c={c} open={appointOpen} onClose={() => setAppointOpen(false)} />}
       {isCbm && <ReplaceDialog c={c} active={active} open={replaceOpen} onClose={() => setReplaceOpen(false)} />}
       {isCbm && <EndDialog committeeId={c.id} membershipId={ending} onClose={() => setEnding(null)} />}
+      {isCbm && <NewPeriodDialog c={c} open={periodOpen} onClose={() => setPeriodOpen(false)} />}
     </div>
   );
 }
@@ -182,7 +191,8 @@ function ReplaceDialog({ c, active, open, onClose }: { c: CommitteeDetail; activ
   const [outgoing, setOutgoing] = React.useState<string[]>([]);
   const [reason, setReason] = React.useState('');
   const [appointments, setAppointments] = React.useState<Appointment[]>([{ userId: '', role: 'MEMBER', termStart: todayKigali() }]);
-  const outIds = scope === 'ALL' ? active.map((m) => m.membershipId) : outgoing;
+  // The Secretary is permanent and stays when all other members are replaced.
+  const outIds = scope === 'ALL' ? active.filter((m) => m.role !== 'SECRETARY').map((m) => m.membershipId) : outgoing;
   const replace = useMutate(() => committees.replace(c.id, { scope, reason, outgoingMembershipIds: outIds, appointments: appointments.filter((x) => x.userId) }), {
     invalidate: [['committee', c.id], ['composition', c.id], ['tasks']],
     onSuccess: (r) => { onClose(); if (r.regulatorTask) alert(t('committee.regulatorTaskCreated', { due: r.regulatorTask.dueDate ?? '' })); },
@@ -248,6 +258,62 @@ function EndDialog({ committeeId, membershipId, onClose }: { committeeId: string
         <DialogHeader><DialogTitle>{t('committee.endMembership')}</DialogTitle></DialogHeader>
         <Field id="end-reason" label={t('common.reason')} required><Textarea id="end-reason" value={reason} onChange={(e) => setReason(e.target.value)} /></Field>
         <DialogFooter><Button disabled={!reason.trim() || end.isPending} onClick={() => end.mutate(undefined)}>{t('committee.endMembership')}</Button></DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function Periods({ c }: { c: CommitteeDetail }) {
+  const { t } = useTranslation();
+  return (
+    <Card>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>{t('committee.period')}</TableHead>
+            <TableHead>{t('committee.appointmentRef')}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {c.periods.map((p) => (
+            <TableRow key={p.id}>
+              <TableCell><PeriodLabel period={p} /></TableCell>
+              <TableCell>{p.appointmentRef ?? '—'}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Card>
+  );
+}
+
+/** Reappoint the committee: same name, a new period ending automatically. */
+function NewPeriodDialog({ c, open, onClose }: { c: CommitteeDetail; open: boolean; onClose: () => void }) {
+  const { t } = useTranslation();
+  const cfg = useConfig();
+  const months = Number(cfg.data?.values['committee.periodMonths'] ?? 36);
+  const [startsOn, setStartsOn] = React.useState(todayKigali());
+  const [appointmentRef, setAppointmentRef] = React.useState('');
+  const save = useMutate(() => committees.reappoint(c.id, { startsOn, appointmentRef: appointmentRef || undefined }), {
+    invalidate: [['committee', c.id], ['committees']], onSuccess: onClose, success: t('common.saved'),
+  });
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent closeLabel={t('common.close')}>
+        <DialogHeader>
+          <DialogTitle>{t('committee.newPeriod')}</DialogTitle>
+          <DialogDescription>{t('committee.newPeriodHelp', { name: c.name })}</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-3">
+          <Field id="np-start" label={t('committee.periodStart')} hint={t('committee.periodStartHint', { months })} required>
+            <Input id="np-start" type="date" value={startsOn} onChange={(e) => setStartsOn(e.target.value)} />
+          </Field>
+          <Field id="np-ref" label={t('committee.appointmentRef')}><Input id="np-ref" value={appointmentRef} onChange={(e) => setAppointmentRef(e.target.value)} /></Field>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
+          <Button disabled={!startsOn || save.isPending} onClick={() => save.mutate(undefined)}>{t('committee.newPeriod')}</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -10,8 +10,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import rw.gov.ptc.auth.api.IdentityAdmin;
 import rw.gov.ptc.auth.api.InstitutionRole;
-import rw.gov.ptc.auth.internal.TestActors;
 import rw.gov.ptc.auth.internal.TestActors.Actor;
+import rw.gov.ptc.auth.internal.TestActors;
 import rw.gov.ptc.common.Time;
 import rw.gov.ptc.support.IntegrationTest;
 import rw.gov.ptc.support.TestBeans;
@@ -128,7 +128,6 @@ class CommitteeCompositionTest extends IntegrationTest {
         appoint(c, actors.user(inst, Set.of(), false, null), "CHAIRPERSON");
         appoint(c, actors.user(inst, Set.of(), true, null), "SECRETARY");
         Actor newChair = actors.user(inst, Set.of(), false, null);
-        Actor newSec = actors.user(inst, Set.of(), true, null);
 
         mvc.perform(actors.post_(cbm, Map.of("scope", "ALL", "reason", "short"), "/api/committees/{id}/replacements", c))
                 .andExpect(status().isBadRequest())
@@ -137,8 +136,7 @@ class CommitteeCompositionTest extends IntegrationTest {
         JsonNode res = actors.body(mvc.perform(actors.post_(cbm, Map.of(
                 "scope", "ALL",
                 "reason", "Audit report found the committee failed to meet for six months",
-                "appointments", List.of(Map.of("userId", newChair.userId, "role", "CHAIRPERSON"),
-                        Map.of("userId", newSec.userId, "role", "SECRETARY"))),
+                "appointments", List.of(Map.of("userId", newChair.userId, "role", "CHAIRPERSON"))),
                 "/api/committees/{id}/replacements", c)).andExpect(status().isOk()).andReturn());
         JsonNode task = res.get("regulatorTask");
         assertThat(task.get("kind").asText()).isEqualTo("REGULATOR_NOTIFICATION");
@@ -152,6 +150,55 @@ class CommitteeCompositionTest extends IntegrationTest {
                 .andExpect(status().isBadRequest());
         mvc.perform(actors.post_(cbm, Map.of("reference", "Letter 2026/77"), "/api/tasks/{id}/complete", task.get("id").asText()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("DONE"));
+    }
+
+    @Test
+    void periodsEndAutomaticallyAndFollowEachAppointment() throws Exception {
+        String today = Time.today().toString();
+        String firstStart = Time.today().minusYears(2).toString();
+        String firstEnd = Time.today().minusYears(2).plusMonths(36).minusDays(1).toString();
+        UUID c = committee("PTC-A", Map.of("periodStart", firstStart, "appointmentRef", "Decision 12/2024"));
+        JsonNode first = actors.body(mvc.perform(actors.get_(cbm, "/api/committees/{id}", c)).andReturn()).get("currentPeriod");
+        assertThat(first.get("endsOn").asText()).isEqualTo(firstEnd);
+        assertThat(first.get("appointmentRef").asText()).isEqualTo("Decision 12/2024");
+
+        // Seats end with the period they start in.
+        Actor chair = actors.user(inst, Set.of(), false, null);
+        Actor secretary = actors.user(inst, Set.of(), true, null);
+        assertThat(actors.body(appoint(c, chair, "CHAIRPERSON")).get("membership").get("termEnd").asText()).isEqualTo(firstEnd);
+        appoint(c, secretary, "SECRETARY");
+
+        // Replacing all members appoints the committee again from today; the Secretary stays.
+        Actor newChair = actors.user(inst, Set.of(), false, null);
+        JsonNode res = actors.body(mvc.perform(actors.post_(cbm, Map.of("scope", "ALL",
+                "reason", "The committee's mandate was withdrawn by the accounting officer",
+                "appointments", List.of(Map.of("userId", newChair.userId, "role", "CHAIRPERSON"))),
+                "/api/committees/{id}/replacements", c)).andExpect(status().isOk()).andReturn());
+        String secondEnd = res.get("period").get("endsOn").asText();
+        assertThat(res.get("period").get("startsOn").asText()).isEqualTo(today);
+        assertThat(secondEnd).isEqualTo(Time.today().plusMonths(36).minusDays(1).toString());
+        assertThat(res.get("appointed").get(0).get("termEnd").asText()).isEqualTo(secondEnd);
+
+        JsonNode detail = actors.body(mvc.perform(actors.get_(cbm, "/api/committees/{id}", c)).andReturn());
+        assertThat(detail.get("name").asText()).isEqualTo("Committee PTC-A");
+        assertThat(detail.get("periods")).hasSize(2);
+        assertThat(detail.get("periods").get(1).get("closedOn").asText()).isEqualTo(Time.today().minusDays(1).toString());
+        JsonNode members = detail.get("members");
+        assertThat(members).hasSize(2);
+        JsonNode sec = members.get(1);
+        assertThat(sec.get("role").asText()).isEqualTo("SECRETARY");
+        assertThat(sec.get("userId").asText()).isEqualTo(secretary.userId.toString());
+        assertThat(sec.get("termEnd").asText()).isEqualTo(secondEnd);
+
+        // A member of the past committee may join the next one.
+        assertThat(appoint(c, chair, "MEMBER").getResponse().getStatus()).isEqualTo(200);
+
+        mvc.perform(actors.post_(cbm, Map.of("startsOn", Time.today().plusDays(5).toString()), "/api/committees/{id}/periods", c))
+                .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.code").value("committee.period_future"));
+        mvc.perform(actors.post_(cbm, Map.of("startsOn", today), "/api/committees/{id}/periods", c))
+                .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.code").value("committee.period_overlap"));
+        Actor officer = actors.login(actors.user(inst, Set.of(), true, null));
+        mvc.perform(actors.post_(officer, Map.of(), "/api/committees/{id}/periods", c)).andExpect(status().isForbidden());
     }
 
     @Test
