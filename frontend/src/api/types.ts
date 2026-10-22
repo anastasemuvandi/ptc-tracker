@@ -193,6 +193,8 @@ export interface RuleIssue {
 export interface CompositionResult {
   compliant: boolean;
   issues: RuleIssue[];
+  /** Article 5 carry-over; the Secretary is not counted. */
+  carryOver: { carriedOver: number; maxCarriedOver: number; minNew: number };
 }
 export interface Candidate {
   userId: Uuid;

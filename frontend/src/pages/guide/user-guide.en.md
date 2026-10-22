@@ -98,7 +98,12 @@ Under **Committees**, create a committee by giving its **name** (e.g. "PTC A") a
 
 A committee is appointed for a **period** of three years (configurable). The committee keeps its name across periods: when it is appointed again, choose *New period* on the committee page, and the period history is kept under *Periods*. Replacing all members also starts a new period. A badge warns when the period is about to end or has ended.
 
-Members' terms end with the period they are appointed in. When a new period starts, members' seats end, except the Secretary's: the procurement officer is a permanent member and continues automatically. Anyone from the past committee may be appointed again; going beyond the configured number of renewals shows a warning but does not block (an institution can make it blocking in Settings).
+Members' terms end with the period they are appointed in. When a new period starts, members' seats end, except the Secretary's: the procurement officer is a permanent member and continues automatically. Anyone from the past committee may be appointed again, within the limits of Article 5 of the 2020 order:
+
+- **A term is renewable only once.** Appointing someone to a third consecutive term is refused.
+- **More than half of the members may not serve two consecutive terms.** At a renewal, at most half of the seats may go to members continuing from the previous term: 2 of 5, 3 of 7, 1 of 3. The rest must go to new people. The Secretary, a permanent member, is not counted.
+
+The *Composition* tab and the appointment form show how many members continue, the most allowed and how many seats must go to new members. An appointment that would break either limit is refused with the reason.
 
 ### Appointing members
 

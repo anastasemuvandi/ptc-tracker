@@ -561,7 +561,8 @@
     "compliant": "La composition respecte les règles",
     "liveCheck": "Vérification de la composition",
     "title": "Composition",
-    "warning": "Avertissement"
+    "warning": "Avertissement",
+    "carryOver": "Article 5 : {{carried}} membres sur {{max}} au plus continuent du mandat précédent ; au moins {{minNew}} sièges reviennent à de nouveaux membres. Le secrétaire, membre permanent, n'est pas compté."
   },
   "tasks": {
     "completed": "Tâche terminée",
@@ -1308,7 +1309,7 @@
       "composition.blockProcurementOfficerMajority": "Interdire une majorité d'agents de passation",
       "term.lengthMonths": "Durée du mandat (mois)",
       "term.maxRenewals": "Renouvellements autorisés",
-      "term.consecutiveWarningShare": "Alerter quand cette proportion siège en mandats consécutifs",
+      "term.consecutiveWarningShare": "Part maximale du comité pouvant exercer des mandats consécutifs",
       "term.expiryAlertDays": "Alerte avant fin de mandat (jours)",
       "replacement.regulatorNotificationDays": "Informer le régulateur après remplacement de tous les membres (jours)",
       "session.noticeOrdinaryWorkingDays": "Préavis des séances ordinaires (jours ouvrables)",
@@ -1345,7 +1346,8 @@
       "request.minDocuments": "Documents requis pour soumettre",
       "request.maxDocuments": "Documents autorisés par demande",
       "request.maxDocumentBytes": "Taille maximale d'un document (octets)",
-      "request.documentTypes": "Formats de documents acceptés"
+      "request.documentTypes": "Formats de documents acceptés",
+      "term.consecutiveShareBlocks": "Bloquer la reconduction au-delà de cette part"
     }
   },
   "audit": {
@@ -1564,7 +1566,7 @@
       "below_size": "Le comité compte moins de membres que sa taille.",
       "cbm_cannot_be_member": "Le Chief Budget Manager constitue les comités et ne peut en être membre.",
       "cbm_is_member": "Cette personne siège dans un comité ; mettez fin à ce mandat avant de lui confier le rôle de CBM.",
-      "consecutive_terms_majority": "Plus de la moitié du comité exercerait des mandats consécutifs.",
+      "consecutive_terms_majority": "{{count}} membres sur {{size}} exerceraient des mandats consécutifs ; au plus {{max}} peuvent continuer du mandat précédent (article 5). Nommez plutôt une nouvelle personne.",
       "excluded_office": "Les titulaires de cette charge ({{office}}) ne peuvent siéger dans un comité.",
       "no_chairperson": "Aucun Président nommé.",
       "no_procurement_officer": "Aucun agent de passation dans le comité (l'un d'eux assure le secrétariat).",
@@ -1574,7 +1576,7 @@
       "role_taken": "Ce rôle est déjà occupé par un autre membre.",
       "secretary_not_procurement_officer": "Le Secrétaire devrait être un agent de passation.",
       "size_exceeded": "Le comité dépasserait sa taille.",
-      "term_limit_reached": "Cette personne a atteint le nombre maximal de mandats consécutifs.",
+      "term_limit_reached": "{{user}} exercerait son {{term}}e mandat consécutif ; le mandat n'est renouvelable qu'une fois (article 5).",
       "unknown_user": "Personne inconnue.",
       "user_inactive": "Ce compte n'est pas actif."
     },

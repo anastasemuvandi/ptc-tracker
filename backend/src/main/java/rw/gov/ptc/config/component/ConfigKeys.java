@@ -19,6 +19,7 @@ public final class ConfigKeys {
     public static final String TERM_MAX_RENEWALS = "term.maxRenewals";
     public static final String TERM_LIMIT_BLOCKS = "term.limitBlocks";
     public static final String TERM_CONSECUTIVE_WARNING_SHARE = "term.consecutiveWarningShare";
+    public static final String TERM_CONSECUTIVE_SHARE_BLOCKS = "term.consecutiveShareBlocks";
     public static final String TERM_EXPIRY_ALERT_DAYS = "term.expiryAlertDays";
     public static final String REGULATOR_NOTIFICATION_DAYS = "replacement.regulatorNotificationDays";
 

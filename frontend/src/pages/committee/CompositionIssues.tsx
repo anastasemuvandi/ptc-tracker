@@ -5,18 +5,19 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export function CompositionIssues({ result, title }: { result: CompositionResult; title?: string }) {
   const { t } = useTranslation();
-  if (result.issues.length === 0) {
-    return (
-      <Alert variant="success">
-        <CheckCircle2 className="h-4 w-4" aria-hidden />
-        <AlertDescription>{t('composition.compliant')}</AlertDescription>
-      </Alert>
-    );
-  }
+  const { carriedOver, maxCarriedOver, minNew } = result.carryOver;
   return (
     <div className="grid gap-2">
       {title && <p className="text-sm font-semibold">{title}</p>}
-      {result.issues.map((i, n) => (
+      <p className={carriedOver > maxCarriedOver ? 'text-sm font-medium text-destructive' : 'text-sm text-muted-foreground'}>
+        {t('composition.carryOver', { carried: carriedOver, max: maxCarriedOver, minNew })}
+      </p>
+      {result.issues.length === 0 ? (
+        <Alert variant="success">
+          <CheckCircle2 className="h-4 w-4" aria-hidden />
+          <AlertDescription>{t('composition.compliant')}</AlertDescription>
+        </Alert>
+      ) : result.issues.map((i, n) => (
         <Alert key={n} variant={i.severity === 'ERROR' ? 'destructive' : 'warning'}>
           {i.severity === 'ERROR' ? <XCircle className="h-4 w-4" aria-hidden /> : <AlertTriangle className="h-4 w-4" aria-hidden />}
           <AlertTitle>{i.severity === 'ERROR' ? t('composition.blocked') : t('composition.warning')}</AlertTitle>

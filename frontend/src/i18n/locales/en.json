@@ -561,7 +561,8 @@
     "compliant": "Composition complies with the rules",
     "liveCheck": "Composition check",
     "title": "Composition",
-    "warning": "Warning"
+    "warning": "Warning",
+    "carryOver": "Article 5: {{carried}} of at most {{max}} members continue from the previous term; at least {{minNew}} seats go to new members. The Secretary, a permanent member, is not counted."
   },
   "tasks": {
     "completed": "Task completed",
@@ -1308,7 +1309,7 @@
       "composition.blockProcurementOfficerMajority": "Block a procurement-officer majority",
       "term.lengthMonths": "Term length (months)",
       "term.maxRenewals": "Renewals allowed",
-      "term.consecutiveWarningShare": "Warn when this share serves consecutive terms",
+      "term.consecutiveWarningShare": "Most members (share of the committee) who may serve consecutive terms",
       "term.expiryAlertDays": "Alert before term expiry (days)",
       "replacement.regulatorNotificationDays": "Notify the regulator after replacing all members (days)",
       "session.noticeOrdinaryWorkingDays": "Notice for ordinary sessions (working days)",
@@ -1345,7 +1346,8 @@
       "request.minDocuments": "Documents required to submit a request",
       "request.maxDocuments": "Documents allowed per request",
       "request.maxDocumentBytes": "Largest document (bytes)",
-      "request.documentTypes": "Accepted document formats"
+      "request.documentTypes": "Accepted document formats",
+      "term.consecutiveShareBlocks": "Block carrying over more than that share"
     }
   },
   "audit": {
@@ -1564,7 +1566,7 @@
       "below_size": "The committee has fewer members than its size.",
       "cbm_cannot_be_member": "The Chief Budget Manager constitutes committees and cannot be a member of one.",
       "cbm_is_member": "This person holds a committee seat; end it before giving the CBM role.",
-      "consecutive_terms_majority": "More than half of the committee would be serving consecutive terms.",
+      "consecutive_terms_majority": "{{count}} of {{size}} members would serve consecutive terms; at most {{max}} may continue from the previous term (Article 5). Appoint someone new instead.",
       "excluded_office": "Holders of this office ({{office}}) may not sit on a committee.",
       "no_chairperson": "No Chairperson appointed.",
       "no_procurement_officer": "No procurement officer on the committee (one acts as secretary).",
@@ -1574,7 +1576,7 @@
       "role_taken": "This role is already held by another member.",
       "secretary_not_procurement_officer": "The Secretary should be a procurement officer.",
       "size_exceeded": "The committee would exceed its size.",
-      "term_limit_reached": "This person has reached the maximum number of consecutive terms.",
+      "term_limit_reached": "{{user}} would serve consecutive term {{term}}; a term is renewable only once (Article 5).",
       "unknown_user": "Unknown person.",
       "user_inactive": "This account is not active."
     },

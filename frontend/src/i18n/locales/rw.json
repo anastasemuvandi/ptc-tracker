@@ -561,7 +561,8 @@
     "compliant": "Imiterere ya komite yubahiriza amategeko",
     "liveCheck": "Igenzura ry'imiterere",
     "title": "Imiterere ya komite",
-    "warning": "Icyitonderwa"
+    "warning": "Icyitonderwa",
+    "carryOver": "Ingingo ya 5: abanyamuryango {{carried}} kuri {{max}} ntarengwa bakomeza bavuye muri manda ishize; nibura imyanya {{minNew}} ihabwa abanyamuryango bashya. Umunyamabanga, umunyamuryango uhoraho, ntabarirwamo."
   },
   "tasks": {
     "completed": "Umurimo warangiye",
@@ -1308,7 +1309,7 @@
       "composition.blockProcurementOfficerMajority": "Kubuza ko abashinzwe amasoko baba benshi",
       "term.lengthMonths": "Igihe cya manda (amezi)",
       "term.maxRenewals": "Inshuro manda ishobora kongerwa",
-      "term.consecutiveWarningShare": "Kuburira iyo iki gice kiri muri manda zikurikiranye",
+      "term.consecutiveWarningShare": "Igice ntarengwa cya komite gishobora gukora manda zikurikiranye",
       "term.expiryAlertDays": "Kuburira mbere y'iherezo rya manda (iminsi)",
       "replacement.regulatorNotificationDays": "Kumenyesha urwego rugenzura nyuma yo gusimbuza bose (iminsi)",
       "session.noticeOrdinaryWorkingDays": "Igihe cyo gutumiza inama isanzwe (iminsi y'akazi)",
@@ -1345,7 +1346,8 @@
       "request.minDocuments": "Inyandiko zisabwa mbere yo kohereza",
       "request.maxDocuments": "Inyandiko zemewe kuri buri busabe",
       "request.maxDocumentBytes": "Ingano ntarengwa y'inyandiko (bytes)",
-      "request.documentTypes": "Ubwoko bw'inyandiko bwemewe"
+      "request.documentTypes": "Ubwoko bw'inyandiko bwemewe",
+      "term.consecutiveShareBlocks": "Hagarika gukomeza kurenze icyo gice"
     }
   },
   "audit": {
@@ -1564,7 +1566,7 @@
       "below_size": "Komite ifite abanyamuryango bake ku ngano yayo.",
       "cbm_cannot_be_member": "Chief Budget Manager ashyiraho komite, ntashobora kuba umunyamuryango wayo.",
       "cbm_is_member": "Uyu muntu ari muri komite; banza usoze iyo manda mbere yo kumuha inshingano za CBM.",
-      "consecutive_terms_majority": "Abarenga kimwe cya kabiri cya komite bari kuba bari muri manda zikurikiranye.",
+      "consecutive_terms_majority": "Abanyamuryango {{count}} kuri {{size}} bakora manda zikurikiranye; ntarengwa {{max}} ni bo bashobora gukomeza bavuye muri manda ishize (ingingo ya 5). Shyiraho umuntu mushya.",
       "excluded_office": "Abafite uyu mwanya ({{office}}) ntibemerewe kujya muri komite.",
       "no_chairperson": "Nta Perezida washyizweho.",
       "no_procurement_officer": "Nta mukozi ushinzwe amasoko uri muri komite (umwe aba Umunyamabanga).",
@@ -1574,7 +1576,7 @@
       "role_taken": "Izi nshingano zifitwe n'undi munyamuryango.",
       "secretary_not_procurement_officer": "Umunyamabanga yakagombye kuba ushinzwe amasoko.",
       "size_exceeded": "Komite yarenga ingano yayo.",
-      "term_limit_reached": "Uyu muntu yageze ku mubare ntarengwa wa manda zikurikiranye.",
+      "term_limit_reached": "{{user}} yaba akora manda ya {{term}} ikurikiranye; manda yongerwa rimwe gusa (ingingo ya 5).",
       "unknown_user": "Umuntu utazwi.",
       "user_inactive": "Iyi konti ntikora."
     },

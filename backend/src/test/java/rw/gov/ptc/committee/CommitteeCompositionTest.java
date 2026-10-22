@@ -102,6 +102,57 @@ class CommitteeCompositionTest extends IntegrationTest {
                 .andExpect(status().isOk());
     }
 
+    private MvcResult appointFrom(UUID committee, Actor who, LocalDate termStart) throws Exception {
+        return mvc.perform(actors.post_(cbm, Map.of("userId", who.userId, "role", "MEMBER", "termStart", termStart.toString()),
+                "/api/committees/{id}/members", committee)).andReturn();
+    }
+
+    private void newPeriod(UUID committee, LocalDate start) throws Exception {
+        mvc.perform(actors.post_(cbm, Map.of("startsOn", start.toString()), "/api/committees/{id}/periods", committee))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void article5AtMostHalfContinueAndTermsRenewOnce() throws Exception {
+        LocalDate first = Time.today().minusYears(2);
+        UUID c = committee("PTC-A", Map.of("periodStart", first.toString()));
+        Actor a = actors.user(inst, Set.of(), false, null);
+        Actor b = actors.user(inst, Set.of(), false, null);
+        Actor d = actors.user(inst, Set.of(), false, null);
+        for (Actor x : List.of(a, b, d)) {
+            assertThat(appointFrom(c, x, first).getResponse().getStatus()).isEqualTo(200);
+        }
+
+        // Renewal: of 5 seats at most 2 may continue; the third is refused, a new person is not.
+        newPeriod(c, Time.today());
+        assertThat(appoint(c, a, "MEMBER").getResponse().getStatus()).isEqualTo(200);
+        assertThat(appoint(c, b, "MEMBER").getResponse().getStatus()).isEqualTo(200);
+        MvcResult third = appoint(c, d, "MEMBER");
+        assertThat(third.getResponse().getStatus()).isEqualTo(422);
+        JsonNode err = actors.body(third);
+        assertThat(err.get("code").asText()).isEqualTo("composition.consecutive_terms_majority");
+        assertThat(err.get("params").get("max").asInt()).isEqualTo(2);
+        assertThat(appoint(c, actors.user(inst, Set.of(), false, null), "MEMBER").getResponse().getStatus()).isEqualTo(200);
+
+        JsonNode carry = actors.body(mvc.perform(actors.get_(cbm, "/api/committees/{id}/composition", c)).andReturn())
+                .get("carryOver");
+        assertThat(carry.get("carriedOver").asInt()).isEqualTo(2);
+        assertThat(carry.get("maxCarriedOver").asInt()).isEqualTo(2);
+        assertThat(carry.get("minNew").asInt()).isEqualTo(3);
+
+        // A term is renewable only once: a third consecutive term is refused.
+        LocalDate p1 = Time.today().minusYears(4);
+        UUID other = committee("PTC-B", Map.of("periodStart", p1.toString()));
+        Actor x = actors.user(inst, Set.of(), false, null);
+        assertThat(appointFrom(other, x, p1).getResponse().getStatus()).isEqualTo(200);
+        newPeriod(other, Time.today().minusYears(2));
+        assertThat(appointFrom(other, x, Time.today().minusYears(2)).getResponse().getStatus()).isEqualTo(200);
+        newPeriod(other, Time.today());
+        MvcResult again = appoint(other, x, "MEMBER");
+        assertThat(again.getResponse().getStatus()).isEqualTo(422);
+        assertThat(actors.body(again).get("code").asText()).isEqualTo("composition.term_limit_reached");
+    }
+
     @Test
     void cbmAndExcludedOfficesAreBarred() throws Exception {
         UUID c = committee("PTC-A", Map.of());

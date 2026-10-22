@@ -95,7 +95,7 @@ Request types come from `request.types` (default C, D, H). Numbers are `REQ-<yea
 | POST | `/api/committees` | CBM `{name,periodStart}` opens the first period (end = start + `committee.periodMonths` − 1 day; the start may be in the future). The name is unique in the institution, dissolved committees included, ignoring case and spacing. The code (session numbers) is derived from the name and the size is the smallest of `committee.allowedSizes`. 400 `committee.invalid`; 409 `committee.name_taken` `{name}` |
 | GET/PUT | `/api/committees/{id}` | PUT: CBM `{name?,size?,regulatorAuthRef?,regulatorAuthDate?,version}`, 409 `committee.name_taken`. GET: detail + `members[]` (`membershipId,userId,fullName,role,termStart,termEnd,consecutiveTerm,status,isProcurementOfficer`) and `periods[]` (newest first) |
 | POST | `/api/committees/{id}/periods` | CBM `{startsOn,appointmentRef?}` (400 `committee.period_start_required`) reappoints the committee: same name, new period; a running period closes the day before. Active seats end except the Secretary's, which continues into the new period. 422 `committee.period_overlap`, `committee.period_future` |
-| GET | `/api/committees/{id}/composition` | `{compliant, issues:[{code,severity:"ERROR"\|"WARNING",message,params}]}` |
+| GET | `/api/committees/{id}/composition` | `{compliant, issues:[{code,severity:"ERROR"\|"WARNING",message,params}], carryOver:{carriedOver,maxCarriedOver,minNew}}`; `carryOver` applies Article 5 (at most `term.consecutiveWarningShare` of the size may continue from the previous term; the Secretary is not counted) |
 | GET | `/api/committees/{id}/candidates` | institution users with `eligible` + `ineligibleReason` codes |
 | POST | `/api/committees/{id}/members/check` | dry-run of an appointment → composition result |
 | POST | `/api/committees/{id}/members` | CBM `{userId,role,termStart,termEnd?,appointmentRef?,renewMembershipId?}`; `termEnd` defaults to the end of the current period (renewal ends the old seat and starts the next consecutive term) → `{membership, warnings[]}`; 422 on `composition.*` |
@@ -108,9 +108,10 @@ Request types come from `request.types` (default C, D, H). Numbers are `REQ-<yea
 Composition codes: `composition.cbm_cannot_be_member`,
 `composition.excluded_office`, `composition.procurement_officer_majority`,
 `composition.size_exceeded`, `composition.role_taken`,
-`composition.already_member`, `composition.term_limit_reached`;
-warnings `composition.consecutive_terms_majority`,
-`composition.below_size`, `composition.secretary_not_procurement_officer`,
+`composition.already_member`, `composition.term_limit_reached` (unless `term.limitBlocks` is false),
+`composition.consecutive_terms_majority` (when the seat being appointed crosses the limit, unless
+`term.consecutiveShareBlocks` is false; otherwise a warning);
+warnings `composition.below_size`, `composition.secretary_not_procurement_officer`,
 `composition.no_procurement_officer`.
 
 ## Files register

@@ -30,7 +30,15 @@ public class CompositionRules {
     public record Issue(String code, String severity, String message, Map<String, Object> params) {
     }
 
-    public record Result(boolean compliant, List<Issue> issues) {
+    /**
+     * Carry-over at a renewal (Article 5): seats serving a consecutive term,
+     * the most allowed, and the seats that must go to new members. The
+     * Secretary, a permanent member, is outside these numbers.
+     */
+    public record CarryOver(long carriedOver, int maxCarriedOver, int minNew) {
+    }
+
+    public record Result(boolean compliant, List<Issue> issues, CarryOver carryOver) {
 
         public List<Issue> errors() {
             return issues.stream().filter(i -> "ERROR".equals(i.severity())).toList();
@@ -117,8 +125,8 @@ public class CompositionRules {
                 if (!"ACTIVE".equals(u.status()) && !"INVITED".equals(u.status())) {
                     issues.add(error("composition.user_inactive", name + " is not an active user", Map.of("user", name)));
                 }
-                // Past members may join the next committee: the limit warns
-                // unless configured to block. The Secretary is permanent.
+                // A term is renewable only once (blocks unless an institution
+                // configures it to warn). The Secretary is permanent.
                 if (s.consecutiveTerm() > maxConsecutive && !"SECRETARY".equals(s.role())) {
                     issues.add(new Issue("composition.term_limit_reached",
                             config.getBool(ConfigKeys.TERM_LIMIT_BLOCKS) ? "ERROR" : "WARNING",
@@ -153,13 +161,23 @@ public class CompositionRules {
             issues.add(issue);
         }
 
+        // More than half may not serve two consecutive terms: blocks the seat
+        // that would cross the limit, not unrelated changes to a committee
+        // already over it.
         long consecutive = seats.stream().filter(s -> s.consecutiveTerm() > 1 && !"SECRETARY".equals(s.role())).count();
         double share = config.getDecimal(ConfigKeys.TERM_CONSECUTIVE_WARNING_SHARE).doubleValue();
-        if (consecutive > share * committee.size) {
-            issues.add(warning("composition.consecutive_terms_majority",
-                    consecutive + " of " + committee.size + " members would be serving consecutive terms",
-                    Map.of("count", consecutive, "size", committee.size)));
+        int maxCarriedOver = (int) Math.floor(share * committee.size);
+        if (consecutive > maxCarriedOver) {
+            boolean addsConsecutive = seats.stream().anyMatch(s -> s.isNew() && s.consecutiveTerm() > 1
+                    && !"SECRETARY".equals(s.role()));
+            boolean blocks = addsConsecutive && config.getBool(ConfigKeys.TERM_CONSECUTIVE_SHARE_BLOCKS);
+            issues.add(new Issue("composition.consecutive_terms_majority", blocks ? "ERROR" : "WARNING",
+                    consecutive + " of " + committee.size + " members would be serving consecutive terms; at most "
+                            + maxCarriedOver + " may continue from the previous term",
+                    Map.of("count", consecutive, "size", committee.size, "max", maxCarriedOver)));
         }
+        boolean hasSecretary = seats.stream().anyMatch(s -> "SECRETARY".equals(s.role()));
+        int minNew = Math.max(0, committee.size - maxCarriedOver - (hasSecretary ? 1 : 0));
         if (count < committee.size) {
             issues.add(warning("composition.below_size", count + " of " + committee.size + " seats are filled",
                     Map.of("count", count, "size", committee.size)));
@@ -176,7 +194,7 @@ public class CompositionRules {
             }
         });
         boolean compliant = issues.stream().noneMatch(i -> "ERROR".equals(i.severity()));
-        return new Result(compliant, issues);
+        return new Result(compliant, issues, new CarryOver(consecutive, maxCarriedOver, minNew));
     }
 
     /** Consecutive-term number for a new seat starting on termStart. */
