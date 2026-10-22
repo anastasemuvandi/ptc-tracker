@@ -2,6 +2,7 @@ package rw.gov.ptc.request.service;
 
 import rw.gov.ptc.request.dto.AcceptRequest;
 import rw.gov.ptc.request.dto.RequestInput;
+import rw.gov.ptc.request.dto.ScheduleRequest;
 import rw.gov.ptc.request.entity.PtcRequest;
 import rw.gov.ptc.request.entity.RequestDocument;
 
@@ -41,6 +42,12 @@ public interface RequestService {
     RequestDocument document(UUID id, UUID documentId);
 
     PtcRequest accept(UUID id, AcceptRequest req);
+
+    /**
+     * Accepts a submitted request as a file of the session's committee and
+     * puts it on that session's agenda, in one step.
+     */
+    PtcRequest schedule(UUID id, ScheduleRequest req);
 
     PtcRequest returnToRequester(UUID id, String reason);
 

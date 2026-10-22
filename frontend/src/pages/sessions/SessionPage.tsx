@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, FileDown, FileText, Plus, Trash2, WifiOff } from 'lucide-react';
-import { sessions, files, decisions } from '@/api/endpoints';
+import { sessions, files, decisions, requests, contracts } from '@/api/endpoints';
 import type { AttendanceStatus, ItemType, SessionDetail } from '@/api/types';
 import { submitQueueable } from '@/lib/outbox';
 import { liveQuorum } from '@/lib/quorum';
@@ -14,7 +14,9 @@ import { useOnline } from '@/hooks/useOnline';
 import { ItemTypeBadge, PageHeader, QueryState, StatusBadge } from '@/components/app/common';
 import { QuorumIndicator } from '@/components/domain/QuorumIndicator';
 import { AttendanceToggle } from '@/components/domain/AttendanceToggle';
-import { ActivityList, ActivityPicker, CarryOverCard, activityProgress } from '@/components/domain/AgendaActivities';
+import { ActivityChecklist, ActivityList, ActivityPicker, CarryOverCard, activityProgress } from '@/components/domain/AgendaActivities';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useConfig } from '@/lib/config';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -261,6 +263,9 @@ function AddAgendaItemDialog({ open, onOpenChange, detail }: { open: boolean; on
   const [adminKind, setAdminKind] = React.useState('ADOPT_MINUTES');
   const [adminNote, setAdminNote] = React.useState('');
   const [activities, setActivities] = React.useState<string[]>([]);
+  const [source, setSource] = React.useState<'normal' | 'request'>('normal');
+  const submitted = useQuery({ queryKey: ['requests', 'inbox', 'SUBMITTED'], queryFn: () => requests.inbox('SUBMITTED'), enabled: open });
+  const waiting = submitted.data?.length ?? 0;
   const fileList = useQuery({
     queryKey: ['files', { committeeId: detail.committee.id, type: itemType }],
     queryFn: () => files.list({ committeeId: detail.committee.id, type: itemType }),
@@ -280,6 +285,17 @@ function AddAgendaItemDialog({ open, onOpenChange, detail }: { open: boolean; on
           <DialogTitle>{t('sessions.addItem')}</DialogTitle>
           <DialogDescription>{t('agenda.scopeNotice')}</DialogDescription>
         </DialogHeader>
+        <Tabs value={source} onValueChange={(v) => setSource(v as 'normal' | 'request')}>
+          <TabsList className="mb-3 grid w-full grid-cols-2">
+            <TabsTrigger value="normal">{t('agenda.sourceNormal')}</TabsTrigger>
+            <TabsTrigger value="request">
+              {t('agenda.sourceRequest')}{waiting > 0 && <Badge variant="warning" className="ml-2">{waiting}</Badge>}
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="request">
+            <FromRequestForm detail={detail} onDone={() => onOpenChange(false)} onCancel={() => onOpenChange(false)} />
+          </TabsContent>
+          <TabsContent value="normal">
         <div className="grid gap-4">
           <Field id="item-type" label={t('agenda.itemType')}>
             <SimpleSelect id="item-type" value={itemType} onChange={(v) => { setItemType(v as ItemType); setFileId(''); }}
@@ -316,7 +332,74 @@ function AddAgendaItemDialog({ open, onOpenChange, detail }: { open: boolean; on
           <Button variant="outline" onClick={() => onOpenChange(false)}>{t('common.cancel')}</Button>
           <Button disabled={add.isPending || (itemType !== 'I' && (!fileId || activities.length === 0))} onClick={() => add.mutate(undefined)}>{t('sessions.addItem')}</Button>
         </DialogFooter>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/**
+ * A submitted request goes on the agenda in one step: it is accepted as a
+ * file of this session's committee and tabled with the chosen activities.
+ */
+function FromRequestForm({ detail, onDone, onCancel }: { detail: SessionDetail; onDone: () => void; onCancel: () => void }) {
+  const { t } = useTranslation();
+  const cfg = useConfig();
+  const submitted = useQuery({ queryKey: ['requests', 'inbox', 'SUBMITTED'], queryFn: () => requests.inbox('SUBMITTED') });
+  const [requestId, setRequestId] = React.useState('');
+  const [contractId, setContractId] = React.useState('');
+  const [activities, setActivities] = React.useState<string[]>([]);
+  const chosen = (submitted.data ?? []).find((r) => r.id === requestId);
+  const needsContract = !!chosen && (chosen.itemType === 'C' || chosen.itemType === 'D');
+  const cts = useQuery({ queryKey: ['contracts'], queryFn: contracts.list, enabled: needsContract });
+  const allowed = chosen ? ((cfg.data?.values['agenda.activities'] as Record<string, string[]> | undefined)?.[chosen.itemType] ?? []) : [];
+  React.useEffect(() => {
+    setActivities(allowed);
+    setContractId('');
+    // Reset when another request is chosen.
+  }, [requestId, cfg.data]);
+  React.useEffect(() => {
+    const match = (cts.data ?? []).find((c) => c.contractRef.trim().toLowerCase() === (chosen?.contractRef ?? '').trim().toLowerCase());
+    if (match && !contractId) setContractId(match.id);
+  }, [cts.data, chosen, contractId]);
+  const schedule = useMutate(() => requests.schedule(requestId, { sessionId: detail.session.id, contractId: contractId || undefined, activities }), {
+    invalidate: [['session', detail.session.id], ['requests'], ['files']],
+    onSuccess: () => { setRequestId(''); onDone(); }, success: t('agenda.requestScheduled'),
+  });
+  if (submitted.isLoading) return null;
+  if ((submitted.data ?? []).length === 0) {
+    return (
+      <div className="grid gap-3">
+        <p className="text-sm text-muted-foreground">{t('agenda.noSubmittedRequests')}</p>
+        <DialogFooter><Button variant="outline" onClick={onCancel}>{t('common.close')}</Button></DialogFooter>
+      </div>
+    );
+  }
+  return (
+    <div className="grid gap-4">
+      <Field id="req" label={t('agenda.chooseRequest')} hint={t('agenda.fromRequestHelp', { committee: detail.committee.code })}>
+        <SimpleSelect id="req" value={requestId} onChange={setRequestId} placeholder={t('common.choose')}
+          options={(submitted.data ?? []).map((r) => ({ value: r.id, label: `${r.requestNumber} — ${r.itemType} — ${r.title} (${r.requesterName})` }))} />
+      </Field>
+      {chosen && (
+        <p className="text-sm">
+          <ItemTypeBadge type={chosen.itemType} /> {t(`itemType.${chosen.itemType}`)} · {t('agenda.requestDocuments', { count: chosen.documentCount })} ·{' '}
+          <Link className="text-primary underline" to={`/requests/${chosen.id}`} target="_blank" rel="noreferrer">{t('requests.openRequest')}</Link>
+        </p>
+      )}
+      {needsContract && (
+        <Field id="req-contract" label={t('files.contract')} hint={t('requests.contractMatchHint', { ref: chosen?.contractRef ?? '' })} required>
+          <SimpleSelect id="req-contract" value={contractId} onChange={setContractId} placeholder={t('common.choose')}
+            options={(cts.data ?? []).map((c) => ({ value: c.id, label: `${c.contractRef} — ${c.title}` }))} />
+        </Field>
+      )}
+      {chosen && <ActivityChecklist allowed={allowed} outstanding={allowed} value={activities} onChange={setActivities} />}
+      <DialogFooter>
+        <Button variant="outline" onClick={onCancel}>{t('common.cancel')}</Button>
+        <Button disabled={!chosen || activities.length === 0 || (needsContract && !contractId) || schedule.isPending}
+          onClick={() => schedule.mutate(undefined)}>{t('agenda.acceptAndAdd')}</Button>
+      </DialogFooter>
+    </div>
   );
 }

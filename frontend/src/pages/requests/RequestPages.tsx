@@ -433,3 +433,81 @@ export function FileRequestCard({ fileId }: { fileId: string }) {
     </Card>
   );
 }
+
+/** Where a request stands, from submission to the file's closure. */
+const JOURNEY = ['SUBMITTED', 'RECEIVED', 'SCHEDULED', 'UNDER_REVIEW', 'RECOMMENDATION_ISSUED', 'SUBMITTED_TO_CBM', 'CLOSED'];
+
+function journeyStep(r: RequestRow): number {
+  if (r.status === 'SUBMITTED') return 0;
+  if (r.status !== 'ACCEPTED' || !r.fileStage) return -1;
+  const i = JOURNEY.indexOf(r.fileStage);
+  return i < 0 ? JOURNEY.indexOf('UNDER_REVIEW') : i;
+}
+
+/** The requester's home: what needs their action and how far each request has gone. */
+export function RequesterDashboard() {
+  const { t, i18n } = useTranslation();
+  const q = useQuery({ queryKey: ['requests', 'mine'], queryFn: requests.mine, refetchInterval: 60_000 });
+  return (
+    <QueryState query={q}>
+      {(list) => {
+        const action = list.filter((r) => r.status === 'DRAFT' || r.status === 'RETURNED');
+        const withCommittee = list.filter((r) => r.status === 'SUBMITTED');
+        const inProgress = list.filter((r) => r.status === 'ACCEPTED' && r.fileStage !== 'CLOSED');
+        const closed = list.filter((r) => r.status === 'ACCEPTED' && r.fileStage === 'CLOSED');
+        const active = [...action, ...withCommittee, ...inProgress];
+        const tiles: [string, number][] = [
+          [t('requests.dash.needsAction'), action.length], [t('requests.dash.withCommittee'), withCommittee.length],
+          [t('requests.dash.inProgress'), inProgress.length], [t('requests.dash.closed'), closed.length],
+        ];
+        return (
+          <section className="grid gap-3" aria-labelledby="my-requests-heading">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 id="my-requests-heading" className="text-lg font-semibold">{t('requests.mineTitle')}</h2>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" asChild><Link to="/requests">{t('requests.dash.all')}</Link></Button>
+                <Button size="sm" asChild><Link to="/requests/new"><FilePlus2 className="h-4 w-4" aria-hidden />{t('requests.new')}</Link></Button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {tiles.map(([label, n]) => (
+                <Card key={label}><CardContent className="pt-4"><p className="text-2xl font-semibold">{n}</p><p className="text-sm text-muted-foreground">{label}</p></CardContent></Card>
+              ))}
+            </div>
+            {active.length === 0 && <p className="text-sm text-muted-foreground">{t('requests.dash.none')}</p>}
+            {active.map((r) => {
+              const step = journeyStep(r);
+              return (
+                <Card key={r.id} className={r.status === 'RETURNED' ? 'border-2 border-warning' : undefined}>
+                  <CardContent className="grid gap-2 pt-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link className="font-medium text-primary underline-offset-4 hover:underline" to={`/requests/${r.id}`}>{r.requestNumber}</Link>
+                      <span className="min-w-0 flex-1 truncate">{r.title}</span>
+                      <StatusBadge ns="requests.status" value={r.status} />
+                    </div>
+                    {r.status === 'RETURNED' && <p className="text-sm text-warning-foreground">{t('requests.dash.returnedHint')}</p>}
+                    {r.status === 'DRAFT' && <p className="text-sm text-muted-foreground">{t('requests.dash.draftHint')}</p>}
+                    {step >= 0 && (
+                      <ol className="flex gap-1" aria-label={t('requests.progress')}>
+                        {JOURNEY.map((s, i) => (
+                          <li key={s} className={`h-2 flex-1 rounded-full ${i <= step ? 'bg-primary' : 'bg-muted'}`}
+                            title={s === 'SUBMITTED' ? t('requests.status.SUBMITTED') : t(`stage.${s}`)} aria-current={i === step ? 'step' : undefined}>
+                            <span className="sr-only">{s === 'SUBMITTED' ? t('requests.status.SUBMITTED') : t(`stage.${s}`)}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    )}
+                    <p className="text-sm text-muted-foreground">
+                      {step >= 0 && (r.status === 'SUBMITTED' ? t('requests.dash.awaitingCommittee') : `${r.fileNumber} · ${t(`stage.${r.fileStage}`)}`)}
+                      {r.nextSessionNumber && r.nextSessionAt && ` · ${t('requests.nextSession', { session: r.nextSessionNumber, date: formatInstant(r.nextSessionAt, i18n.language) })}`}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </section>
+        );
+      }}
+    </QueryState>
+  );
+}

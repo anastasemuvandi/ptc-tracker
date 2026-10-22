@@ -23,6 +23,7 @@ import rw.gov.ptc.notification.service.NotificationService;
 import rw.gov.ptc.request.component.DocumentSignatures;
 import rw.gov.ptc.request.dto.AcceptRequest;
 import rw.gov.ptc.request.dto.RequestInput;
+import rw.gov.ptc.request.dto.ScheduleRequest;
 import rw.gov.ptc.request.entity.PtcRequest;
 import rw.gov.ptc.request.entity.RequestDocument;
 import rw.gov.ptc.request.enums.RequestStatus;
@@ -30,6 +31,8 @@ import rw.gov.ptc.request.repository.PtcRequestRepository;
 import rw.gov.ptc.request.repository.RequestDocumentRepository;
 import rw.gov.ptc.request.service.RequestService;
 import rw.gov.ptc.security.Access;
+import rw.gov.ptc.session.dto.AddItem;
+import rw.gov.ptc.session.service.AgendaService;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -59,10 +62,13 @@ public class RequestServiceImpl implements RequestService {
     private final AuditService audit;
     private final Access access;
     private final JdbcTemplate jdbc;
+    private final AgendaService agenda;
 
     public RequestServiceImpl(PtcRequestRepository requests, RequestDocumentRepository documents, AppUserRepository users,
                               FileService files, FileAccess fileAccess, Numbering numbering, ConfigService config,
-                              NotificationService notifications, AuditService audit, Access access, JdbcTemplate jdbc) {
+                              NotificationService notifications, AuditService audit, Access access, JdbcTemplate jdbc,
+                              AgendaService agenda) {
+        this.agenda = agenda;
         this.requests = requests;
         this.documents = documents;
         this.users = users;
@@ -128,7 +134,12 @@ public class RequestServiceImpl implements RequestService {
             SELECT r.id, r.request_number, r.item_type, r.title, r.status, r.contract_ref, r.tender_ref,
                    r.submitted_at, r.decided_at, r.created_at, u.full_name AS requester_name,
                    (SELECT count(*) FROM request_document d WHERE d.request_id = r.id) AS document_count,
-                   p.file_number, p.stage AS file_stage
+                   p.file_number, p.stage AS file_stage,
+                   (SELECT s.session_number FROM agenda_item a JOIN committee_session s ON s.id = a.session_id
+                     WHERE a.file_id = r.file_id AND s.status IN ('PLANNED', 'IN_PROGRESS')
+                     ORDER BY s.scheduled_at LIMIT 1) AS next_session_number,
+                   (SELECT min(s.scheduled_at) FROM agenda_item a JOIN committee_session s ON s.id = a.session_id
+                     WHERE a.file_id = r.file_id AND s.status IN ('PLANNED', 'IN_PROGRESS')) AS next_session_at
               FROM ptc_request r
               JOIN app_user u ON u.id = r.requester_id
               LEFT JOIN proc_file p ON p.id = r.file_id
@@ -379,6 +390,19 @@ public class RequestServiceImpl implements RequestService {
         audit.record("ACCEPT_REQUEST", "ptc_request", r.id, before, r);
         notifications.notify(r.requesterId, "REQUEST_ACCEPTED", List.of(r.requestNumber, f.fileNumber),
                 "/requests/" + r.id, "ptc_request", r.id, "REQUEST_ACCEPTED:" + r.id);
+        return r;
+    }
+
+    @Override
+    @Transactional
+    public PtcRequest schedule(UUID id, ScheduleRequest in) {
+        if (in.sessionId() == null) {
+            throw ApiException.badRequest("request.session_required", "Choose the session");
+        }
+        UUID committeeId = jdbc.queryForList("SELECT committee_id FROM committee_session WHERE id = ?", UUID.class, in.sessionId())
+                .stream().findFirst().orElseThrow(() -> ApiException.notFound("Session"));
+        PtcRequest r = accept(id, new AcceptRequest(committeeId, in.contractId(), in.procurementOfficerId(), null, null));
+        agenda.add(in.sessionId(), new AddItem(r.fileId, r.itemType, null, null, in.activities()));
         return r;
     }
 

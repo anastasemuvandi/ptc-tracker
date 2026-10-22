@@ -83,16 +83,26 @@ function NotCompletedDialog({ sessionId, activity, onClose }: { sessionId: strin
 
 /** Checkboxes of the activities for a file; those still outstanding are preselected. */
 export function ActivityPicker({ sessionId, fileId, value, onChange }: {
-  sessionId: string; fileId: string; value: string[]; onChange: (codes: string[]) => void;
+  /** Absent while scheduling, before the session exists. */
+  sessionId?: string; fileId: string; value: string[]; onChange: (codes: string[]) => void;
 }) {
-  const { t } = useTranslation();
-  const options = useQuery({ queryKey: ['activity-options', sessionId, fileId], queryFn: () => sessions.activityOptions(sessionId, fileId) });
+  const options = useQuery({
+    queryKey: ['activity-options', sessionId ?? null, fileId],
+    queryFn: () => (sessionId ? sessions.activityOptions(sessionId, fileId) : sessions.fileActivityOptions(fileId)),
+  });
   React.useEffect(() => {
     if (options.data) onChange(options.data.outstanding);
     // Preselect once per file.
   }, [options.data]);
   if (!options.data) return null;
-  const { allowed, outstanding } = options.data;
+  return <ActivityChecklist allowed={options.data.allowed} outstanding={options.data.outstanding} value={value} onChange={onChange} />;
+}
+
+/** The checkboxes themselves; activities not outstanding are shown as already completed. */
+export function ActivityChecklist({ allowed, outstanding, value, onChange }: {
+  allowed: string[]; outstanding: string[]; value: string[]; onChange: (codes: string[]) => void;
+}) {
+  const { t } = useTranslation();
   return (
     <fieldset className="grid gap-2">
       <legend className="mb-1 text-sm font-medium">{t('activity.toPerform')}</legend>

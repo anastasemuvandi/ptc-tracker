@@ -811,6 +811,8 @@ export interface RequestRow {
   documentCount: number;
   fileNumber: string | null;
   fileStage: string | null;
+  nextSessionNumber: string | null;
+  nextSessionAt: IsoInstant | null;
 }
 export interface RequestDocumentRow {
   id: Uuid;

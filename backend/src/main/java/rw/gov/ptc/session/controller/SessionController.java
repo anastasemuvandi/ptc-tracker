@@ -14,6 +14,7 @@ import rw.gov.ptc.session.dto.CarryOver;
 import rw.gov.ptc.session.dto.RecordActivity;
 import rw.gov.ptc.session.entity.AgendaActivity;
 import rw.gov.ptc.session.service.ActivityService;
+import rw.gov.ptc.session.service.SchedulingService;
 import rw.gov.ptc.session.component.SessionAccess;
 import rw.gov.ptc.session.dto.AddItem;
 import rw.gov.ptc.session.dto.ApologyRequest;
@@ -42,9 +43,11 @@ public class SessionController {
     private final AgendaService agenda;
     private final AttendanceService attendance;
     private final ActivityService activities;
+    private final SchedulingService scheduling;
 
     public SessionController(SessionService sessions, SessionAccess sessionAccess, AgendaService agenda,
-                             AttendanceService attendance, ActivityService activities) {
+                             AttendanceService attendance, ActivityService activities, SchedulingService scheduling) {
+        this.scheduling = scheduling;
         this.activities = activities;
         this.sessions = sessions;
         this.sessionAccess = sessionAccess;
@@ -61,7 +64,7 @@ public class SessionController {
 
     @PostMapping
     public CommitteeSession create(@RequestBody SessionRequest req) {
-        return sessions.create(req);
+        return scheduling.schedule(req);
     }
 
     @GetMapping("/{id}")
@@ -87,6 +90,12 @@ public class SessionController {
     @PostMapping("/{id}/agenda")
     public AgendaItem addItem(@PathVariable UUID id, @RequestBody AddItem req) {
         return agenda.add(id, req);
+    }
+
+    /** Activities for a file before any session exists (scheduling page). */
+    @GetMapping("/activity-options")
+    public Map<String, Object> fileActivityOptions(@RequestParam UUID fileId) {
+        return activities.options(fileId);
     }
 
     @GetMapping("/{id}/activity-options")

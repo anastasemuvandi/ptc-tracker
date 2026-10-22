@@ -220,13 +220,19 @@ export const contracts = {
 // -------------------------------------------------------------- sessions
 export const sessions = {
   list: (p: { committeeId?: string; from?: string; to?: string } = {}) => api.get<T.SessionRow[]>(`/api/sessions${qs(p)}`),
-  create: (body: { committeeId: T.Uuid; kind: string; scheduledAt: string; location?: string; shortNoticeReason?: string }, opts?: RequestOptions) =>
+  create: (body: {
+    committeeId: T.Uuid; kind: string; scheduledAt: string; location?: string; shortNoticeReason?: string;
+    items?: { fileId: T.Uuid; activities: string[] }[];
+    requests?: { requestId: T.Uuid; contractId?: T.Uuid; activities: string[] }[];
+  }, opts?: RequestOptions) =>
     api.post<T.SessionRow>('/api/sessions', body, opts),
   get: (id: T.Uuid) => api.get<T.SessionDetail>(`/api/sessions/${id}`),
   update: (id: T.Uuid, body: Record<string, unknown>) => api.put<T.SessionRow>(`/api/sessions/${id}`, body),
   setStatus: (id: T.Uuid, status: string) => api.post<T.SessionRow>(`/api/sessions/${id}/status`, { status }),
   addAgendaItem: (id: T.Uuid, body: { fileId?: T.Uuid; itemType: T.ItemType; adminKind?: string; adminNote?: string; activities?: string[] }) =>
     api.post<T.AgendaItem>(`/api/sessions/${id}/agenda`, body),
+  fileActivityOptions: (fileId: T.Uuid) =>
+    api.get<{ allowed: string[]; outstanding: string[] }>(`/api/sessions/activity-options${qs({ fileId })}`),
   activityOptions: (id: T.Uuid, fileId: T.Uuid) =>
     api.get<{ allowed: string[]; outstanding: string[] }>(`/api/sessions/${id}/activity-options${qs({ fileId })}`),
   recordActivity: (id: T.Uuid, activityId: T.Uuid, body: { status: 'COMPLETED' | 'NOT_COMPLETED'; note?: string }) =>
@@ -353,6 +359,8 @@ export const requests = {
     download(`/api/requests/${id}/documents/${doc.id}`, doc.fileName),
   accept: (id: T.Uuid, body: { committeeId: T.Uuid; contractId?: T.Uuid; procurementOfficerId?: T.Uuid; targetDate?: string; title?: string }) =>
     api.post<{ fileId: T.Uuid }>(`/api/requests/${id}/accept`, body),
+  schedule: (id: T.Uuid, body: { sessionId: T.Uuid; contractId?: T.Uuid; activities: string[] }) =>
+    api.post<{ fileId: T.Uuid }>(`/api/requests/${id}/schedule`, body),
   returnToRequester: (id: T.Uuid, reason: string) => api.post<unknown>(`/api/requests/${id}/return`, { reason }),
   forFile: (fileId: T.Uuid) => api.get<T.FileRequestSummary | null>(`/api/files/${fileId}/request`),
 };

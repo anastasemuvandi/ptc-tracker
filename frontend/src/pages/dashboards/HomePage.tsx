@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DataTable, cols } from '@/components/domain/DataTable';
 import { formatInstant } from '@/lib/time';
+import { RequesterDashboard } from '@/pages/requests/RequestPages';
 
 type Row = Record<string, unknown>;
 
@@ -16,15 +17,22 @@ type Row = Record<string, unknown>;
 export function HomePage() {
   const { t, i18n } = useTranslation();
   const { me, hasRole } = useSession();
-  const q = useQuery({ queryKey: ['dashboard', 'member'], queryFn: dashboards.member, enabled: !hasRole('PLATFORM_ADMIN') });
+  // A requester outside the committee sees only their requests' progress.
+  const requesterOnly = hasRole('REQUESTER') && !me?.committees.length && !hasRole('CBM', 'INSTITUTION_ADMIN', 'READ_ONLY');
+  const q = useQuery({ queryKey: ['dashboard', 'member'], queryFn: dashboards.member, enabled: !hasRole('PLATFORM_ADMIN') && !requesterOnly });
   if (hasRole('PLATFORM_ADMIN')) return <Navigate to="/platform" replace />;
-  // A requester outside the committee has nothing else here.
-  if (hasRole('REQUESTER') && !me?.committees.length && !hasRole('CBM', 'INSTITUTION_ADMIN', 'READ_ONLY')) {
-    return <Navigate to="/requests" replace />;
+  if (requesterOnly) {
+    return (
+      <div className="grid gap-4">
+        <PageHeader title={t('dashboard.welcome', { name: me?.fullName ?? '' })} subtitle={me?.institution?.name} />
+        <RequesterDashboard />
+      </div>
+    );
   }
   return (
     <div className="grid gap-4">
       <PageHeader title={t('dashboard.welcome', { name: me?.fullName ?? '' })} subtitle={me?.institution?.name} />
+      {hasRole('REQUESTER') && <RequesterDashboard />}
       <QueryState query={q}>
         {(d) => {
           const decl = (d.myPendingDeclarations as Row[]) ?? [];

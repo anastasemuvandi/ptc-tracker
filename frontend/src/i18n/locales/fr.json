@@ -299,7 +299,12 @@
       "IN_PROGRESS": "En cours",
       "HELD": "Tenue",
       "CANCELLED": "Annulée"
-    }
+    },
+    "agendaToSchedule": "Ordre du jour",
+    "agendaToScheduleHelp": "Choisissez ce que la séance examinera : des dossiers du comité (activité normale) ou des demandes soumises au comité. Les demandes sont acceptées comme dossiers de ce comité. Vous pourrez encore ajouter des points depuis la page de la séance.",
+    "agendaSummary": "À l'ordre du jour : {{files}} dossier(s) et {{requests}} demande(s).",
+    "agendaIncomplete": "Chaque point choisi exige au moins une activité, et les avenants et prorogations leur marché.",
+    "noOpenFiles": "Le comité n'a aucun dossier ouvert."
   },
   "agenda": {
     "adminKindLabel": "Point administratif",
@@ -314,7 +319,16 @@
       "ADOPT_MINUTES": "Adoption du procès-verbal précédent",
       "WORK_PLANNING": "Planification des travaux",
       "MEMBER_INDUCTION": "Intégration des membres"
-    }
+    },
+    "sourceNormal": "Activité normale",
+    "sourceRequest": "Demande soumise",
+    "requestScheduled": "Demande acceptée et inscrite à l'ordre du jour",
+    "noSubmittedRequests": "Aucune demande soumise en attente.",
+    "chooseRequest": "Demande soumise",
+    "fromRequestHelp": "Elle devient un dossier de {{committee}} et est inscrite à cet ordre du jour.",
+    "requestDocuments_one": "{{count}} document",
+    "requestDocuments_other": "{{count}} documents",
+    "acceptAndAdd": "Accepter et inscrire à l'ordre du jour"
   },
   "coi": {
     "details": "Nature de l'intérêt",
@@ -1835,7 +1849,8 @@
       "document_type": "Joignez uniquement des documents PDF, Word, Excel ou des images.",
       "committee_required": "Choisissez le comité qui l'examinera.",
       "decided": "Il a déjà été statué sur cette demande.",
-      "reason_required": "Indiquez pourquoi la demande est renvoyée."
+      "reason_required": "Indiquez pourquoi la demande est renvoyée.",
+      "session_required": "Choisissez la séance."
     },
     "platform": {
       "not_institution_admin": "Seule la vérification en deux étapes d'un administrateur d'institution peut être réinitialisée ici."
@@ -1951,6 +1966,17 @@
     "returnedToast": "Demande renvoyée au demandeur",
     "fromRequest": "Demande {{number}}",
     "submittedBy": "Soumise par {{name}} le {{date}}",
-    "openRequest": "Ouvrir la demande"
+    "openRequest": "Ouvrir la demande",
+    "dash": {
+      "needsAction": "À traiter par vous",
+      "withCommittee": "Auprès du comité",
+      "inProgress": "En cours",
+      "closed": "Clôturées",
+      "all": "Toutes mes demandes",
+      "none": "Vous n'avez aucune demande en cours.",
+      "returnedHint": "Renvoyée : ouvrez-la, corrigez-la et soumettez-la de nouveau.",
+      "draftHint": "Brouillon : joignez les documents et soumettez-la.",
+      "awaitingCommittee": "En attente d'acceptation par le comité"
+    }
   }
 }

@@ -28,6 +28,9 @@ public interface ActivityService {
     /** For the agenda dialog: the activities of this file's type, and those still outstanding. */
     Map<String, Object> options(UUID sessionId, UUID fileId);
 
+    /** The same, for an officer of the file's committee, before a session exists. */
+    Map<String, Object> options(UUID fileId);
+
     AgendaActivity record(UUID sessionId, UUID activityId, RecordActivity req);
 
     /** Activities not completed in earlier sessions of this session's committee, not yet carried over. */

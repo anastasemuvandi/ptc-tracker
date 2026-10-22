@@ -299,7 +299,12 @@
       "IN_PROGRESS": "In progress",
       "HELD": "Held",
       "CANCELLED": "Cancelled"
-    }
+    },
+    "agendaToSchedule": "Agenda",
+    "agendaToScheduleHelp": "Choose what this session will take up: files of the committee (normal activity) or requests submitted to the committee. Requests are accepted as files of this committee. You can still add items later on the session page.",
+    "agendaSummary": "On the agenda: {{files}} file(s) and {{requests}} request(s).",
+    "agendaIncomplete": "Each chosen item needs at least one activity, and amendments and extensions need their contract.",
+    "noOpenFiles": "The committee has no open file."
   },
   "agenda": {
     "adminKindLabel": "Administrative item",
@@ -314,7 +319,16 @@
       "ADOPT_MINUTES": "Adoption of previous minutes",
       "WORK_PLANNING": "Work planning",
       "MEMBER_INDUCTION": "Member induction"
-    }
+    },
+    "sourceNormal": "Normal activity",
+    "sourceRequest": "Submitted request",
+    "requestScheduled": "Request accepted and added to the agenda",
+    "noSubmittedRequests": "No submitted requests are waiting.",
+    "chooseRequest": "Submitted request",
+    "fromRequestHelp": "It becomes a file of {{committee}} and goes on this agenda.",
+    "requestDocuments_one": "{{count}} document",
+    "requestDocuments_other": "{{count}} documents",
+    "acceptAndAdd": "Accept and add to agenda"
   },
   "coi": {
     "details": "Nature of the interest",
@@ -1835,7 +1849,8 @@
       "document_type": "Attach PDF, Word, Excel or image documents only.",
       "committee_required": "Choose the committee that will examine it.",
       "decided": "This request has already been decided.",
-      "reason_required": "Say why the request is returned."
+      "reason_required": "Say why the request is returned.",
+      "session_required": "Choose the session."
     },
     "platform": {
       "not_institution_admin": "Only an institution administrator's two-step verification can be reset here."
@@ -1951,6 +1966,17 @@
     "returnedToast": "Request returned to the requester",
     "fromRequest": "Request {{number}}",
     "submittedBy": "Submitted by {{name}} on {{date}}",
-    "openRequest": "Open request"
+    "openRequest": "Open request",
+    "dash": {
+      "needsAction": "Need your action",
+      "withCommittee": "With the committee",
+      "inProgress": "In progress",
+      "closed": "Closed",
+      "all": "All my requests",
+      "none": "You have no request in progress.",
+      "returnedHint": "Returned to you: open it, correct it and submit it again.",
+      "draftHint": "Draft: attach the documents and submit it.",
+      "awaitingCommittee": "Waiting for the committee to accept it"
+    }
   }
 }

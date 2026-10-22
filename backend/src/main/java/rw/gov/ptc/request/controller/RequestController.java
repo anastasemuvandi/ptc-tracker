@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import rw.gov.ptc.request.dto.AcceptRequest;
 import rw.gov.ptc.request.dto.RequestInput;
 import rw.gov.ptc.request.dto.ReturnRequest;
+import rw.gov.ptc.request.dto.ScheduleRequest;
 import rw.gov.ptc.request.dto.SubmitRequest;
 import rw.gov.ptc.request.entity.PtcRequest;
 import rw.gov.ptc.request.entity.RequestDocument;
@@ -99,6 +100,11 @@ public class RequestController {
     @PostMapping("/requests/{id}/accept")
     public PtcRequest accept(@PathVariable UUID id, @RequestBody AcceptRequest req) {
         return service.accept(id, req);
+    }
+
+    @PostMapping("/requests/{id}/schedule")
+    public PtcRequest schedule(@PathVariable UUID id, @RequestBody ScheduleRequest req) {
+        return service.schedule(id, req);
     }
 
     @PostMapping("/requests/{id}/return")

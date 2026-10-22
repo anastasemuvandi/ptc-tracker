@@ -173,6 +173,58 @@ class RequestFlowTest extends IntegrationTest {
         assertThat(behind.get("documents")).hasSize(2);
         assertThat(call(actors.get_(requester, "/api/requests/mine"))).hasSize(1);
 
+
+        // ---- a submitted request goes straight onto a session agenda
+        String h = call(actors.post_(requester, Map.of("itemType", "H", "title", "Site handover delay",
+                "description", "Advise on the six-week delay in handing over the site"), "/api/requests")).get("id").asText();
+        mvc.perform(upload(requester, h, "handover.pdf", "application/pdf", PDF)).andExpect(status().isOk());
+        call(actors.post_(requester, Map.of("declarationConfirmed", true), "/api/requests/{id}/submit", h));
+        String session = call(actors.post_(chair, Map.of("committeeId", committee, "kind", "ORDINARY",
+                "scheduledAt", java.time.Instant.now().plus(2, java.time.temporal.ChronoUnit.HOURS).toString(),
+                "shortNoticeReason", "Contractor waiting for the committee's advice"), "/api/sessions")).get("id").asText();
+        mvc.perform(actors.post_(sec, Map.of("sessionId", session, "activities", List.of("DOCUMENT_REVIEW")), "/api/requests/{id}/schedule", h))
+                .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.code").value("agenda.activity_unknown"));
+        assertThat(call(actors.get_(sec, "/api/requests/{id}", h)).get("status").asText()).isEqualTo("SUBMITTED");
+        JsonNode scheduled = call(actors.post_(sec, Map.of("sessionId", session, "activities", List.of("REFERRAL_REVIEW")),
+                "/api/requests/{id}/schedule", h));
+        assertThat(scheduled.get("status").asText()).isEqualTo("ACCEPTED");
+        JsonNode agendaItem = call(actors.get_(sec, "/api/sessions/{id}", session)).get("agenda").get(0);
+        assertThat(agendaItem.get("fileId").asText()).isEqualTo(scheduled.get("fileId").asText());
+        assertThat(agendaItem.get("activities").get(0).get("activityCode").asText()).isEqualTo("REFERRAL_REVIEW");
+        JsonNode progress = call(actors.get_(requester, "/api/requests/{id}", h)).get("file");
+        assertThat(progress.get("stage").asText()).isEqualTo("SCHEDULED");
+        assertThat(progress.get("nextSession").get("sessionNumber").asText()).matches("PTCA \\d{4}/\\d{3}");
+        JsonNode listed = null;
+        for (JsonNode x : call(actors.get_(requester, "/api/requests/mine"))) {
+            if (h.equals(x.get("id").asText())) listed = x;
+        }
+        assertThat(listed.get("nextSessionNumber").asText()).isEqualTo(progress.get("nextSession").get("sessionNumber").asText());
+
+        // ---- scheduling a session with its agenda: a normal file and a submitted request, all or nothing
+        String d = call(actors.post_(requester, Map.of("itemType", "D", "title", "Extension of 60 days",
+                "description", "Rains delayed the works", "contractRef", "CT-2026-009"), "/api/requests")).get("id").asText();
+        mvc.perform(upload(requester, d, "rain-log.pdf", "application/pdf", PDF)).andExpect(status().isOk());
+        call(actors.post_(requester, Map.of("declarationConfirmed", true), "/api/requests/{id}/submit", d));
+        JsonNode options = call(actors.get_(sec, "/api/sessions/activity-options?fileId={f}", fileId));
+        assertThat(options.get("allowed").toString()).contains("AMENDMENT_REVIEW");
+        Map<String, Object> base = Map.of("committeeId", committee, "kind", "ORDINARY",
+                "scheduledAt", java.time.Instant.now().plus(3, java.time.temporal.ChronoUnit.HOURS).toString(),
+                "shortNoticeReason", "Two contract matters need a decision this week");
+        var failing = new java.util.HashMap<String, Object>(base);
+        failing.put("items", List.of(Map.of("fileId", fileId, "activities", List.of("AMENDMENT_REVIEW"))));
+        failing.put("requests", List.of(Map.of("requestId", d, "activities", List.of("EXTENSION_REVIEW"))));
+        mvc.perform(actors.post_(sec, failing, "/api/sessions"))
+                .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.code").value("file.contract_required"));
+        assertThat(call(actors.get_(sec, "/api/requests/{id}", d)).get("status").asText()).isEqualTo("SUBMITTED");
+        var ok = new java.util.HashMap<String, Object>(failing);
+        ok.put("requests", List.of(Map.of("requestId", d, "contractId", contract, "activities", List.of("EXTENSION_REVIEW", "RECOMMENDATION"))));
+        String withAgenda = call(actors.post_(sec, ok, "/api/sessions")).get("id").asText();
+        JsonNode agenda = call(actors.get_(sec, "/api/sessions/{id}", withAgenda)).get("agenda");
+        assertThat(agenda).hasSize(2);
+        assertThat(agenda.get(0).get("fileId").asText()).isEqualTo(fileId);
+        assertThat(agenda.get(1).get("activities")).hasSize(2);
+        assertThat(call(actors.get_(requester, "/api/requests/{id}", d)).get("file").get("stage").asText()).isEqualTo("SCHEDULED");
+
         // ---- short-term access ends on its date: the account is disabled
         Owner.jdbc().update("UPDATE app_user SET requester_category = 'SHORT_TERM', access_until = ? WHERE id = ?",
                 Time.today().minusDays(1), other.userId);

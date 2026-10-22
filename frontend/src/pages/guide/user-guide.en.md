@@ -138,6 +138,8 @@ Under **My requests**, choose *New request*: the type (contract amendment, contr
 
 The Chairperson, Vice-Chairperson or Secretary either accepts the request, which registers it as a file, or returns it with a reason. If it is returned, correct it and submit it again. Once accepted, the request shows the file number, its progress (received, scheduled, under review, recommendation issued, submitted to CBM, closed) and the session it is on. You receive a notification at each decision. You can withdraw a request until it is accepted.
 
+When you sign in, your home page shows your requests: how many need your action (drafts and returned requests), are with the committee, are in progress or are closed, and for each one a progress bar from submission to closure with the session it is on.
+
 ## Committee officers: Chairperson, Vice-Chairperson, Secretary
 
 ### Requests from outside the committee
@@ -164,7 +166,11 @@ When a member asks for a file to be tabled, the Chairperson accepts or declines 
 
 Under **Sessions** choose *New session*: ordinary or extraordinary, date and time, and place. Session numbers (e.g. PTCA 2026/014) are assigned automatically. If the date is inside the notice period (3 working days for ordinary, 24 hours for extraordinary sessions, by default), you are warned and must record why short notice was given.
 
+The same page lets you choose the session's **agenda** straight away, with a toggle between **Normal activity** (the committee's open files) and **Submitted request** (requests waiting for the committee; the tab shows how many). Tick each item and its activities; for a request that concerns a contract, choose the contract. Scheduling then creates the session, accepts the chosen requests as files of the committee and puts everything on the agenda in one step; if anything is wrong, nothing is saved and you are told what to fix. You can still add items later from the session page.
+
 ### Building the agenda
+
+*Add agenda item* has two tabs. **Normal activity** puts one of the committee's files on the agenda, as described below. **Submitted request** lists requests waiting for the committee (the tab shows how many): choose one, the contract for an amendment or extension, and the activities, then *Accept and add to agenda*; the request becomes a file of this committee and is tabled in one step. The *Schedule a session* page reminds you when requests are waiting.
 
 Each agenda item must be an open file of the committee, and its type must match the file's type. Free-text items are not possible: other matters come in only as a type H referred matter from the CBM. The one exception is type I, the committee's own business (adopting previous minutes, work planning, member induction), which never carries a recommendation. If the file you need is not listed, use *Register a new file of this type* in the dialog.
 

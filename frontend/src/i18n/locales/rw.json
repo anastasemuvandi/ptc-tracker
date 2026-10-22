@@ -299,7 +299,12 @@
       "IN_PROGRESS": "Irakomeje",
       "HELD": "Yabaye",
       "CANCELLED": "Yasubitswe"
-    }
+    },
+    "agendaToSchedule": "Umurongo w'ibyigwa",
+    "agendaToScheduleHelp": "Hitamo ibizigwa muri iyi nama: dosiye za komite (igikorwa gisanzwe) cyangwa ubusabe bwoherejwe kuri komite. Ubusabe bwemerwa nka dosiye z'iyi komite. Ushobora kongeraho ingingo nyuma ku ipaji y'inama.",
+    "agendaSummary": "Ku murongo w'ibyigwa: dosiye {{files}} n'ubusabe {{requests}}.",
+    "agendaIncomplete": "Buri ngingo yahiswemo isaba nibura igikorwa kimwe, kandi guhindura no kongera igihe bisaba amasezerano yabyo.",
+    "noOpenFiles": "Komite nta dosiye ifunguye ifite."
   },
   "agenda": {
     "adminKindLabel": "Ingingo y'imbere",
@@ -314,7 +319,16 @@
       "ADOPT_MINUTES": "Kwemeza inyandikomvugo iheruka",
       "WORK_PLANNING": "Igenamigambi ry'imirimo",
       "MEMBER_INDUCTION": "Kwakira abanyamuryango bashya"
-    }
+    },
+    "sourceNormal": "Igikorwa gisanzwe",
+    "sourceRequest": "Ubusabe bwatanzwe",
+    "requestScheduled": "Ubusabe bwemewe kandi bwashyizwe ku murongo w'ibyigwa",
+    "noSubmittedRequests": "Nta busabe bwatanzwe butegereje.",
+    "chooseRequest": "Ubusabe bwatanzwe",
+    "fromRequestHelp": "Buba dosiye ya {{committee}} kandi bushyirwa kuri uyu murongo w'ibyigwa.",
+    "requestDocuments_one": "Inyandiko {{count}}",
+    "requestDocuments_other": "Inyandiko {{count}}",
+    "acceptAndAdd": "Emera kandi ushyire ku murongo w'ibyigwa"
   },
   "coi": {
     "details": "Imiterere y'inyungu",
@@ -1835,7 +1849,8 @@
       "document_type": "Omekaho inyandiko za PDF, Word, Excel cyangwa amafoto gusa.",
       "committee_required": "Hitamo komite izabusuzuma.",
       "decided": "Ubu busabe bwafashweho icyemezo.",
-      "reason_required": "Sobanura impamvu ubusabe busubijwe."
+      "reason_required": "Sobanura impamvu ubusabe busubijwe.",
+      "session_required": "Hitamo inama."
     },
     "platform": {
       "not_institution_admin": "Hano hashobora gusubirwamo gusa kwemeza mu byiciro bibiri k'umuyobozi w'ikigo."
@@ -1951,6 +1966,17 @@
     "returnedToast": "Ubusabe bwasubijwe usaba",
     "fromRequest": "Ubusabe {{number}}",
     "submittedBy": "Bwatanzwe na {{name}} ku wa {{date}}",
-    "openRequest": "Fungura ubusabe"
+    "openRequest": "Fungura ubusabe",
+    "dash": {
+      "needsAction": "Bigukeneye",
+      "withCommittee": "Biri kuri komite",
+      "inProgress": "Birakorwa",
+      "closed": "Byarangiye",
+      "all": "Ubusabe bwanjye bwose",
+      "none": "Nta busabe ufite burimo gukorwa.",
+      "returnedHint": "Bwagusubijwe: bufungure, ubukosore hanyuma wongere ubwohereze.",
+      "draftHint": "Umushinga: omekaho inyandiko hanyuma ubwohereze.",
+      "awaitingCommittee": "Bitegereje ko komite ibwemera"
+    }
   }
 }

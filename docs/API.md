@@ -73,7 +73,7 @@ Request types come from `request.types` (default C, D, H). Numbers are `REQ-<yea
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/api/requests/mine` | requester's own `[{id,requestNumber,itemType,title,status,contractRef,tenderRef,submittedAt,decidedAt,createdAt,requesterName,documentCount,fileNumber,fileStage}]` |
+| GET | `/api/requests/mine` | requester's own `[{id,requestNumber,itemType,title,status,contractRef,tenderRef,submittedAt,decidedAt,createdAt,requesterName,documentCount,fileNumber,fileStage,nextSessionNumber,nextSessionAt}]` |
 | GET | `/api/requests/inbox?status` | officers of any committee and readers of all committees; never drafts |
 | POST | `/api/requests` | REQUESTER `{itemType,title,description,contractRef?,tenderRef?}` → DRAFT; C/D need `contractRef`. 400 `request.invalid_type`, `request.invalid`, `request.contract_ref_required`; 403 `request.access_ended` |
 | GET | `/api/requests/{id}` | requester, or a reviewer once submitted: request + `documents[]` + `file{id,fileNumber,stage,committeeCode,nextSession}` |
@@ -83,6 +83,7 @@ Request types come from `request.types` (default C, D, H). Numbers are `REQ-<yea
 | POST | `/api/requests/{id}/submit` | `{declarationConfirmed:true}` (no bid documents, bidder submissions or prices); needs `request.minDocuments`. Notifies committee officers |
 | POST | `/api/requests/{id}/withdraw` | requester, before acceptance |
 | POST | `/api/requests/{id}/accept` | officer of `committeeId` `{committeeId, contractId?, procurementOfficerId?, targetDate?, title?}` → registers the file (H: referral = request number and description) and notifies the requester |
+| POST | `/api/requests/{id}/schedule` | officer of the session's committee `{sessionId, contractId?, procurementOfficerId?, activities?}`: accepts the request as a file of that committee and puts it on the session agenda in one transaction (agenda and activity errors as for `POST /api/sessions/{id}/agenda`; nothing is kept if either step fails) |
 | POST | `/api/requests/{id}/return` | officer `{reason}` → RETURNED; requester may edit and submit again |
 | GET | `/api/files/{fileId}/request` | the request behind a file with its documents (204 when none) |
 
@@ -141,7 +142,8 @@ warnings `composition.consecutive_terms_majority`,
 | Method | Path | Notes |
 |---|---|---|
 | GET | `/api/sessions?committeeId&from&to` | list with `sessionNumber,kind,scheduledAt,status,agendaCount` |
-| POST | `/api/sessions` | officer `{committeeId,kind,scheduledAt,location,shortNoticeReason?}`; 422 `session.short_notice_reason_required` `{earliestWithoutShortNotice}` |
+| POST | `/api/sessions` | officer `{committeeId,kind,scheduledAt,location,shortNoticeReason?, items?:[{fileId,activities}], requests?:[{requestId,contractId?,activities}]}`: schedules the session with its first agenda in one transaction; `requests` are accepted as files of the committee. 422 `session.short_notice_reason_required` `{earliestWithoutShortNotice}`, and agenda, activity and request errors (nothing is kept) |
+| GET | `/api/sessions/activity-options?fileId` | officer of the file's committee `{allowed, outstanding}` (before a session exists) |
 | GET | `/api/sessions/{id}` | `{session, committee, agenda[] (each with activities[{id,activityCode,status,note,recordedAt,recordedByName,carriedFromId,carriedFromSession}]), members[], quorum, myRole, myApology}` |
 | PUT | `/api/sessions/{id}` | officer, with `version` |
 | GET | `/api/sessions/{id}/quorum` | live quorum |

@@ -148,6 +148,13 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
+    public Map<String, Object> options(UUID fileId) {
+        ProcFile f = files.findById(fileId).orElseThrow(() -> ApiException.notFound("File"));
+        access.requireOfficer(f.committeeId);
+        return Map.of("allowed", allowed(f.itemType), "outstanding", outstanding(f));
+    }
+
+    @Override
     @Transactional
     public AgendaActivity record(UUID sessionId, UUID activityId, RecordActivity req) {
         CommitteeSession s = sessions.forOfficer(sessionId);
