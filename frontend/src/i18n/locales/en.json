@@ -126,7 +126,8 @@
     "acts": {
       "VOTE": "You are casting a vote.",
       "COI_DECLARATION": "You are declaring a conflict of interest.",
-      "RECOMMENDATION_ISSUE": "You are issuing the committee's recommendation."
+      "RECOMMENDATION_ISSUE": "You are issuing the committee's recommendation.",
+      "MFA_RESET": "You are resetting an institution administrator's two-step verification."
     }
   },
   "pwa": {
@@ -1150,7 +1151,8 @@
       "committees": "Committees",
       "activeUsers": "Active users",
       "sessionsLast30Days": "Sessions (30 days)",
-      "lastActivity": "Last activity"
+      "lastActivity": "Last activity",
+      "admins": "Administrators"
     }
   },
   "reports": {
@@ -1357,7 +1359,13 @@
     "rotateConfirm": "Rotate the token signing key now? Existing sessions keep working during the overlap period.",
     "rotateKeys": "Rotate signing key",
     "subtitle": "Across all institutions on this deployment.",
-    "title": "Platform"
+    "title": "Platform",
+    "administrators": "Administrators",
+    "administratorsOf": "Administrators of {{name}}",
+    "administratorsHelp": "If an institution administrator has lost both their authenticator and their recovery codes, and no other administrator of the institution can reset it, reset their two-step verification here. Their sessions end and they set it up again at their next sign-in.",
+    "mfaEnrolled": "Two-step verification set up",
+    "mfaNotEnrolled": "Two-step verification not set up",
+    "resetMfaConfirm": "Reset {{name}}'s two-step verification? Their sessions end and they set it up again at their next sign-in. Confirm the person's identity outside the system first."
   },
   "settings": {
     "changePassword": "Change password",
@@ -1828,6 +1836,9 @@
       "committee_required": "Choose the committee that will examine it.",
       "decided": "This request has already been decided.",
       "reason_required": "Say why the request is returned."
+    },
+    "platform": {
+      "not_institution_admin": "Only an institution administrator's two-step verification can be reset here."
     }
   },
   "guide": {

@@ -179,6 +179,22 @@ class AuthFlowTest extends IntegrationTest {
     }
 
     @Test
+    void administratorsMustEnrolMfa() throws Exception {
+        String instAdmin = newUser(Set.of(InstitutionRole.INSTITUTION_ADMIN));
+        JsonNode first = body(login(instAdmin, PASSWORD));
+        assertThat(first.get("status").asText()).isEqualTo("MFA_ENROLMENT_REQUIRED");
+        assertThat(first.has("accessToken")).isFalse();
+
+        String platformAdmin = "u" + Ids.newId() + "@example.rw";
+        identity.invite(new IdentityAdmin.Invitation(null, platformAdmin, "Platform Admin", null, null,
+                false, "en", Set.of(InstitutionRole.PLATFORM_ADMIN)), null);
+        mvc.perform(post("/api/auth/invitations/accept").contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of("token", mailer.token(platformAdmin), "password", PASSWORD))))
+                .andExpect(status().isNoContent());
+        assertThat(body(login(platformAdmin, PASSWORD)).get("status").asText()).isEqualTo("MFA_ENROLMENT_REQUIRED");
+    }
+
+    @Test
     void jwksAndStrictUuidValidation() throws Exception {
         mvc.perform(get("/.well-known/jwks.json")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.keys[0].kty").value("RSA"))

@@ -139,6 +139,14 @@ export interface PlatformMetric {
   lastActivity: IsoInstant | null;
 }
 
+export interface InstitutionAdmin {
+  id: Uuid;
+  fullName: string;
+  email: string;
+  status: UserRow['status'];
+  mfaEnrolled: boolean;
+}
+
 // ------------------------------------------------------------ committees
 export interface CommitteePeriod {
   id: Uuid;

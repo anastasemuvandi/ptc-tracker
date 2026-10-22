@@ -51,6 +51,9 @@ public class AuthStore {
     record OneTimeRow(UUID id, UUID userId, String purpose, Instant expiresAt, Instant usedAt) {
     }
 
+    record AdminRow(UUID id, String fullName, String email, String status, boolean mfaEnrolled) {
+    }
+
     private final NamedParameterJdbcTemplate jdbc;
     private final TransactionTemplate tx;
     private final ObjectMapper mapper;
@@ -142,6 +145,19 @@ public class AuthStore {
                     .addValue("inst", r == InstitutionRole.PLATFORM_ADMIN ? null : institutionId)
                     .addValue("r", r.name()).addValue("by", grantedBy));
         }
+    }
+
+    /** Institution administrators of one institution, for the platform administrator. */
+    public List<AdminRow> institutionAdmins(UUID institutionId) {
+        return jdbc.query("""
+                SELECT u.id, u.full_name, u.email, u.status,
+                       EXISTS (SELECT 1 FROM mfa_totp t WHERE t.user_id = u.id AND t.confirmed_at IS NOT NULL)
+                  FROM app_user u
+                  JOIN user_role r ON r.user_id = u.id AND r.role = 'INSTITUTION_ADMIN'
+                 WHERE u.institution_id = :i
+                 ORDER BY u.full_name
+                """, Map.of("i", institutionId), (rs, i) -> new AdminRow(rs.getObject(1, UUID.class),
+                rs.getString(2), rs.getString(3), rs.getString(4), rs.getBoolean(5)));
     }
 
     /** Active committee seats, for the committees claim. */

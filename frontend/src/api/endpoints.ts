@@ -124,6 +124,8 @@ export const platform = {
     defaultCurrency?: string; adminEmail: string; adminFullName: string;
   }) => api.post<{ id: T.Uuid; adminUserId: T.Uuid }>('/api/platform/institutions', body),
   rotateKeys: () => api.post<{ kid: string }>('/api/platform/keys/rotate'),
+  institutionAdmins: (id: T.Uuid) => api.get<T.InstitutionAdmin[]>(`/api/platform/institutions/${id}/admins`),
+  resetAdminMfa: (id: T.Uuid, userId: T.Uuid) => api.post<void>(`/api/platform/institutions/${id}/admins/${userId}/reset-mfa`),
 };
 
 // ------------------------------------------------------------ committees

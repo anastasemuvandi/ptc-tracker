@@ -371,7 +371,7 @@ public class AuthService {
         return new SessionTokens(access, props.accessTokenTtl().toSeconds(), raw, props.refreshTokenTtl());
     }
 
-    /** MFA is mandatory for the CBM and committee officers; configurable for members. */
+    /** MFA is mandatory for administrators, the CBM and committee officers; configurable for members. */
     boolean mfaRequired(AuthStore.UserRow user) {
         Set<String> mandatory = Set.copyOf(props.mfaMandatoryRoles());
         for (InstitutionRole r : store.roles(user.id())) {

@@ -22,7 +22,7 @@ You join by invitation only; there is no self-registration. Your institution adm
 
 ### Two-step verification
 
-Two-step verification is **mandatory** for the CBM, Chairperson, Vice-Chairperson and Secretary. Your institution may also require it for members. If it applies to you, the first sign-in shows a set-up screen:
+Two-step verification is **mandatory** for administrators, the CBM, Chairperson, Vice-Chairperson and Secretary. Your institution may also require it for members. If it applies to you, the first sign-in shows a set-up screen:
 
 1. Install an authenticator app on your phone (Google Authenticator, Microsoft Authenticator or Aegis).
 2. Scan the QR code on screen, or type the secret printed under it.
@@ -61,8 +61,8 @@ What you see in the menu depends on your role. You may hold different roles on d
 
 | Role | Main tasks | Two-step verification |
 | --- | --- | --- |
-| Platform administrator | Creates institutions and invites each one's first administrator; sees operational counts only, never file content | Optional |
-| Institution administrator | Invites users and sets their roles; institution settings, minutes template, rules and thresholds, holidays | Optional |
+| Platform administrator | Creates institutions and invites each one's first administrator; sees operational counts only, never file content | Mandatory |
+| Institution administrator | Invites users and sets their roles; institution settings, minutes template, rules and thresholds, holidays | Mandatory |
 | Chief Budget Manager (CBM) | Creates committees, appoints and replaces members, reassigns files and assigns their procurement officer, responds to recommendations. Never a committee member, never votes | Mandatory |
 | Chairperson / Vice-Chairperson | Register files, run sessions, decide tabling requests, open voting, issue recommendations | Mandatory |
 | Secretary (procurement officer) | Registers files, schedules sessions, keeps attendance, records evaluation progress, drafts minutes | Mandatory |
@@ -75,6 +75,8 @@ What you see in the menu depends on your role. You may hold different roles on d
 ### Platform administrator
 
 Under **Platform**, create an institution by giving its name, abbreviation, type, supervising authority and the email of its first institution administrator, who then receives an invitation. The same page lists each institution's counts (committees, active users, open and overdue files, sessions held in the last 30 days); file content is never shown here. You can also suspend an institution and set platform-wide default rules.
+
+If an institution administrator loses both their authenticator and their recovery codes, and no other administrator of that institution can help, open **Administrators** on that institution's row and choose **Reset two-step verification**. Confirm the person's identity outside the system first (for example by phone call to a known number); the system asks for a fresh code from your own app. Their sessions end and they set up two-step verification again at their next sign-in. Only institution administrators can be reset from here, and each reset is recorded in that institution's audit log.
 
 ### Institution administrator
 

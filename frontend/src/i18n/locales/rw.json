@@ -126,7 +126,8 @@
     "acts": {
       "VOTE": "Urimo gutora.",
       "COI_DECLARATION": "Urimo gutangaza inyungu bwite.",
-      "RECOMMENDATION_ISSUE": "Urimo gutanga icyifuzo cya komite."
+      "RECOMMENDATION_ISSUE": "Urimo gutanga icyifuzo cya komite.",
+      "MFA_RESET": "Urimo gusubiramo kwemeza mu byiciro bibiri k'umuyobozi w'ikigo."
     }
   },
   "pwa": {
@@ -1150,7 +1151,8 @@
       "committees": "Komite",
       "activeUsers": "Abakoresha bakora",
       "sessionsLast30Days": "Inama (iminsi 30)",
-      "lastActivity": "Igikorwa giheruka"
+      "lastActivity": "Igikorwa giheruka",
+      "admins": "Abayobozi"
     }
   },
   "reports": {
@@ -1357,7 +1359,13 @@
     "rotateConfirm": "Guhindura ubu urufunguzo rusinya tokeni? Amafungura ariho akomeza gukora mu gihe cy'inzibacyuho.",
     "rotateKeys": "Hindura urufunguzo rwo gusinya",
     "subtitle": "Ibigo byose biri kuri iyi sisitemu.",
-    "title": "Urubuga"
+    "title": "Urubuga",
+    "administrators": "Abayobozi",
+    "administratorsOf": "Abayobozi ba {{name}}",
+    "administratorsHelp": "Niba umuyobozi w'ikigo yarabuze porogaramu yo kwemeza n'amakode yo kugarura, kandi nta wundi muyobozi w'ikigo ushobora kubisubiramo, subiramo hano kwemeza mu byiciro bibiri kwe. Amafungura ye arahagarara kandi azongera kubitunganya ubutaha yinjiye.",
+    "mfaEnrolled": "Kwemeza mu byiciro bibiri birakora",
+    "mfaNotEnrolled": "Kwemeza mu byiciro bibiri ntibiratunganywa",
+    "resetMfaConfirm": "Gusubiramo kwemeza mu byiciro bibiri kwa {{name}}? Amafungura ye arahagarara kandi azongera kubitunganya ubutaha yinjiye. Banza wemeze uwo muntu uwo ari we hanze ya sisitemu."
   },
   "settings": {
     "changePassword": "Hindura ijambobanga",
@@ -1828,6 +1836,9 @@
       "committee_required": "Hitamo komite izabusuzuma.",
       "decided": "Ubu busabe bwafashweho icyemezo.",
       "reason_required": "Sobanura impamvu ubusabe busubijwe."
+    },
+    "platform": {
+      "not_institution_admin": "Hano hashobora gusubirwamo gusa kwemeza mu byiciro bibiri k'umuyobozi w'ikigo."
     }
   },
   "guide": {

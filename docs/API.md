@@ -64,6 +64,8 @@ roles[], committees[{committee_id, role}], token_version, sid, amr`.
 | GET | `/api/audit?entityId&actorId&action&before&limit` | READ_ONLY / admin / CBM |
 | GET | `/api/platform/metrics` | PLATFORM_ADMIN — operational counts only |
 | POST | `/api/platform/institutions` | create institution + invite first admin |
+| GET | `/api/platform/institutions/{id}/admins` | PLATFORM_ADMIN → `[{id,fullName,email,status,mfaEnrolled}]` (institution administrators only) |
+| POST | `/api/platform/institutions/{id}/admins/{userId}/reset-mfa` | PLATFORM_ADMIN, step-up (act `MFA_RESET`) → 204; ends the user's sessions. 404 if the user is not in that institution; 422 `platform.not_institution_admin` |
 
 ## Requests (requesters submit; officers accept or return)
 

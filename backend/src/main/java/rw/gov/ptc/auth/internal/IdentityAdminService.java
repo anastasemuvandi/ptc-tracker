@@ -125,12 +125,32 @@ public class IdentityAdminService implements IdentityAdmin {
     @Override
     public void resetMfa(UUID userId, UUID actor) {
         var user = store.user(userId).orElseThrow(() -> ApiException.notFound("User"));
+        clearMfa(userId);
+        store.audit(user.institutionId(), actor, "MFA_RESET", userId, null);
+    }
+
+    /**
+     * Recovery when an institution has no administrator left who can sign in:
+     * the platform administrator may reset an institution administrator's MFA,
+     * and no one else's.
+     */
+    void resetInstitutionAdminMfa(UUID institutionId, UUID userId, UUID actor) {
+        var user = store.user(userId).filter(u -> institutionId.equals(u.institutionId()))
+                .orElseThrow(() -> ApiException.notFound("User"));
+        if (!store.roles(userId).contains(InstitutionRole.INSTITUTION_ADMIN)) {
+            throw ApiException.rule("platform.not_institution_admin",
+                    "Only an institution administrator's two-step verification can be reset here");
+        }
+        clearMfa(userId);
+        store.audit(user.institutionId(), actor, "MFA_RESET", userId, Map.of("by", "PLATFORM_ADMIN"));
+    }
+
+    private void clearMfa(UUID userId) {
         store.inTransaction(() -> {
             store.deleteMfa(userId);
             store.revokeAllForUser(userId, "mfa_reset");
             store.bumpTokenVersion(userId);
             return null;
         });
-        store.audit(user.institutionId(), actor, "MFA_RESET", userId, null);
     }
 }

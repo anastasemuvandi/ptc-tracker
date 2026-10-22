@@ -126,7 +126,8 @@
     "acts": {
       "VOTE": "Vous émettez un vote.",
       "COI_DECLARATION": "Vous déclarez un conflit d'intérêts.",
-      "RECOMMENDATION_ISSUE": "Vous émettez la recommandation du comité."
+      "RECOMMENDATION_ISSUE": "Vous émettez la recommandation du comité.",
+      "MFA_RESET": "Vous réinitialisez la vérification en deux étapes d'un administrateur d'institution."
     }
   },
   "pwa": {
@@ -1150,7 +1151,8 @@
       "committees": "Comités",
       "activeUsers": "Utilisateurs actifs",
       "sessionsLast30Days": "Séances (30 jours)",
-      "lastActivity": "Dernière activité"
+      "lastActivity": "Dernière activité",
+      "admins": "Administrateurs"
     }
   },
   "reports": {
@@ -1357,7 +1359,13 @@
     "rotateConfirm": "Renouveler maintenant la clé de signature des jetons ? Les sessions existantes restent valables pendant la période de chevauchement.",
     "rotateKeys": "Renouveler la clé de signature",
     "subtitle": "Toutes les institutions de ce déploiement.",
-    "title": "Plateforme"
+    "title": "Plateforme",
+    "administrators": "Administrateurs",
+    "administratorsOf": "Administrateurs de {{name}}",
+    "administratorsHelp": "Si un administrateur de l'institution a perdu à la fois son application d'authentification et ses codes de récupération, et qu'aucun autre administrateur de l'institution ne peut la réinitialiser, réinitialisez ici sa vérification en deux étapes. Ses sessions sont fermées et il la configure à nouveau à sa prochaine connexion.",
+    "mfaEnrolled": "Vérification en deux étapes activée",
+    "mfaNotEnrolled": "Vérification en deux étapes non activée",
+    "resetMfaConfirm": "Réinitialiser la vérification en deux étapes de {{name}} ? Ses sessions sont fermées et il la configure à nouveau à sa prochaine connexion. Vérifiez d'abord l'identité de la personne en dehors du système."
   },
   "settings": {
     "changePassword": "Modifier le mot de passe",
@@ -1828,6 +1836,9 @@
       "committee_required": "Choisissez le comité qui l'examinera.",
       "decided": "Il a déjà été statué sur cette demande.",
       "reason_required": "Indiquez pourquoi la demande est renvoyée."
+    },
+    "platform": {
+      "not_institution_admin": "Seule la vérification en deux étapes d'un administrateur d'institution peut être réinitialisée ici."
     }
   },
   "guide": {

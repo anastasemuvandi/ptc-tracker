@@ -34,6 +34,7 @@ public record AuthProperties(
         @DefaultValue("72h") Duration invitationTtl,
         @DefaultValue("30m") Duration passwordResetTtl,
         @DefaultValue("5m") Duration mfaChallengeTtl,
-        @DefaultValue({"CBM", "CHAIRPERSON", "VICE_CHAIRPERSON", "SECRETARY"}) List<String> mfaMandatoryRoles,
+        @DefaultValue({"PLATFORM_ADMIN", "INSTITUTION_ADMIN", "CBM", "CHAIRPERSON", "VICE_CHAIRPERSON",
+                "SECRETARY"}) List<String> mfaMandatoryRoles,
         @DefaultValue("http://localhost:5173") String publicBaseUrl) {
 }

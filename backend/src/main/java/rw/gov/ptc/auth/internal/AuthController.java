@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -20,6 +21,7 @@ import rw.gov.ptc.common.ApiException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -57,11 +59,18 @@ public class AuthController {
     private final AuthService auth;
     private final AuthProperties props;
     private final KeyManager keys;
+    private final AuthStore store;
+    private final IdentityAdminService identity;
+    private final StepUpService stepUp;
 
-    public AuthController(AuthService auth, AuthProperties props, KeyManager keys) {
+    public AuthController(AuthService auth, AuthProperties props, KeyManager keys, AuthStore store,
+                          IdentityAdminService identity, StepUpService stepUp) {
         this.auth = auth;
         this.props = props;
         this.keys = keys;
+        this.store = store;
+        this.identity = identity;
+        this.stepUp = stepUp;
     }
 
     @GetMapping(value = {"/.well-known/jwks.json", "/api/auth/jwks"}, produces = "application/json")
@@ -171,11 +180,25 @@ public class AuthController {
 
     @PostMapping("/api/platform/keys/rotate")
     public Map<String, Object> rotate(@AuthenticationPrincipal AuthPrincipal principal) {
-        if (!require(principal).has(InstitutionRole.PLATFORM_ADMIN)) {
-            throw ApiException.forbidden("forbidden", "Platform administrators only");
-        }
+        requirePlatformAdmin(principal);
         keys.rotate();
         return Map.of("kid", keys.signingKey().getKeyID());
+    }
+
+    @GetMapping("/api/platform/institutions/{id}/admins")
+    public List<AuthStore.AdminRow> institutionAdmins(@PathVariable UUID id,
+                                                      @AuthenticationPrincipal AuthPrincipal principal) {
+        requirePlatformAdmin(principal);
+        return store.institutionAdmins(id);
+    }
+
+    @PostMapping("/api/platform/institutions/{id}/admins/{userId}/reset-mfa")
+    public ResponseEntity<Void> resetInstitutionAdminMfa(@PathVariable UUID id, @PathVariable UUID userId,
+                                                         @AuthenticationPrincipal AuthPrincipal principal) {
+        requirePlatformAdmin(principal);
+        stepUp.requireRecent(principal, "MFA_RESET");
+        identity.resetInstitutionAdminMfa(id, userId, principal.userId());
+        return ResponseEntity.noContent().build();
     }
 
     // ------------------------------------------------------------------
@@ -210,6 +233,12 @@ public class AuthController {
 
     private void clearCookie(HttpServletResponse res) {
         res.addHeader(HttpHeaders.SET_COOKIE, cookie("", Duration.ZERO).toString());
+    }
+
+    private static void requirePlatformAdmin(AuthPrincipal principal) {
+        if (!require(principal).has(InstitutionRole.PLATFORM_ADMIN)) {
+            throw ApiException.forbidden("forbidden", "Platform administrators only");
+        }
     }
 
     private static AuthPrincipal require(AuthPrincipal principal) {
