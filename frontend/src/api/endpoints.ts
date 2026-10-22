@@ -131,7 +131,7 @@ export const platform = {
 // ------------------------------------------------------------ committees
 export const committees = {
   list: () => api.get<T.CommitteeSummary[]>('/api/committees'),
-  create: (body: { name: string; code: string; size: number; regulatorAuthRef?: string; regulatorAuthDate?: string; periodStart?: string; appointmentRef?: string }) =>
+  create: (body: { name: string; periodStart: string }) =>
     api.post<T.CommitteeSummary>('/api/committees', body),
   get: (id: T.Uuid) => api.get<T.CommitteeDetail>(`/api/committees/${id}`),
   update: (id: T.Uuid, body: Record<string, unknown>) => api.put<T.CommitteeDetail>(`/api/committees/${id}`, body),

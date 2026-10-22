@@ -12,6 +12,7 @@ import rw.gov.ptc.auth.api.IdentityAdmin;
 import rw.gov.ptc.auth.api.InstitutionRole;
 import rw.gov.ptc.auth.internal.TestActors;
 import rw.gov.ptc.auth.internal.TestActors.Actor;
+import rw.gov.ptc.common.Time;
 import rw.gov.ptc.support.IntegrationTest;
 import rw.gov.ptc.support.TestBeans;
 
@@ -69,7 +70,7 @@ class AgendaActivityTest extends IntegrationTest {
         actors = new TestActors(mvc, json, identity, mailer);
         UUID inst = TestActors.newInstitution("AG");
         Actor cbm = actors.login(actors.user(inst, Set.of(InstitutionRole.CBM), false, null));
-        UUID committee = UUID.fromString(call(actors.post_(cbm, Map.of("name", "PTC A", "code", "PTCA", "size", 5),
+        UUID committee = UUID.fromString(call(actors.post_(cbm, Map.of("name", "PTC A", "periodStart", Time.today().toString()),
                 "/api/committees")).get("id").asText());
         Actor chair = actors.user(inst, Set.of(), false, null);
         Actor sec = actors.user(inst, Set.of(), true, null);

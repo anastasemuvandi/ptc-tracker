@@ -92,9 +92,9 @@ Request types come from `request.types` (default C, D, H). Numbers are `REQ-<yea
 | Method | Path | Notes |
 |---|---|---|
 | GET | `/api/committees` | `[{id,name,code,size,status,regulatorAuthRef,regulatorAuthDate,activeMembers,quorumRequired,myRole,currentPeriod:{id,startsOn,endsOn,closedOn,appointmentRef}}]` |
-| POST | `/api/committees` | CBM `{name,code,size,regulatorAuthRef?,regulatorAuthDate?,periodStart?,appointmentRef?}` opens the first period (end = start + `committee.periodMonths` − 1 day); 422 `committee.size_not_allowed`, `committee.regulator_authorisation_required` |
-| GET/PUT | `/api/committees/{id}` | detail + `members[]` (`membershipId,userId,fullName,role,termStart,termEnd,consecutiveTerm,status,isProcurementOfficer`) and `periods[]` (newest first) |
-| POST | `/api/committees/{id}/periods` | CBM `{startsOn?,appointmentRef?}` reappoints the committee: same name, new period; a running period closes the day before. Active seats end except the Secretary's, which continues into the new period. 422 `committee.period_overlap`, `committee.period_future` |
+| POST | `/api/committees` | CBM `{name,periodStart}` opens the first period (end = start + `committee.periodMonths` − 1 day; the start may be in the future). The name is unique in the institution, dissolved committees included, ignoring case and spacing. The code (session numbers) is derived from the name and the size is the smallest of `committee.allowedSizes`. 400 `committee.invalid`; 409 `committee.name_taken` `{name}` |
+| GET/PUT | `/api/committees/{id}` | PUT: CBM `{name?,size?,regulatorAuthRef?,regulatorAuthDate?,version}`, 409 `committee.name_taken`. GET: detail + `members[]` (`membershipId,userId,fullName,role,termStart,termEnd,consecutiveTerm,status,isProcurementOfficer`) and `periods[]` (newest first) |
+| POST | `/api/committees/{id}/periods` | CBM `{startsOn,appointmentRef?}` (400 `committee.period_start_required`) reappoints the committee: same name, new period; a running period closes the day before. Active seats end except the Secretary's, which continues into the new period. 422 `committee.period_overlap`, `committee.period_future` |
 | GET | `/api/committees/{id}/composition` | `{compliant, issues:[{code,severity:"ERROR"\|"WARNING",message,params}]}` |
 | GET | `/api/committees/{id}/candidates` | institution users with `eligible` + `ineligibleReason` codes |
 | POST | `/api/committees/{id}/members/check` | dry-run of an appointment → composition result |

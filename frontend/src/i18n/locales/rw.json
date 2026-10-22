@@ -478,7 +478,7 @@
     "code": "Kode",
     "consecutiveTerm": "Manda ikurikiranye",
     "create": "Kora komite",
-    "createHelp": "Abanyamuryango bashyirwaho komite imaze gukorwa.",
+    "createHelp": "Ha komite izina kandi ushyireho itariki manda yayo itangiriraho. Manda imara amezi {{months}} kandi itariki irangiriraho ishyirwaho ubwayo. Abanyamuryango bashyirwaho komite imaze gukorwa.",
     "created": "Komite yakozwe",
     "decline": "Anga",
     "endMembership": "Soza manda",
@@ -552,7 +552,9 @@
     "noPeriod": "Nta manda yanditswe",
     "periodLapsed": "Manda yarangiye",
     "periodEndsIn_one": "Irangira mu munsi {{count}}",
-    "periodEndsIn_other": "Irangira mu minsi {{count}}"
+    "periodEndsIn_other": "Irangira mu minsi {{count}}",
+    "nameUniqueHint": "Rigomba gutandukana n'izina rya buri yindi komite y'ikigo, harimo n'izasheshwe.",
+    "periodEndsOn": "Irangira ubwayo ku wa {{date}} (amezi {{months}})."
   },
   "composition": {
     "blocked": "Birabujijwe",
@@ -1537,7 +1539,7 @@
     "committee": {
       "chair_required": "Perezida (cyangwa Visi Perezida) ni we wenyine ushobora gukora ibi.",
       "inactive": "Iyi komite ntikora.",
-      "invalid": "Izina, kode n'ingano birakenewe.",
+      "invalid": "Ha komite izina n'itariki itangiriraho.",
       "invalid_appointment": "Ishyirwaho ntiryuzuye.",
       "invalid_renewal": "Iyi manda ntishobora kongerwa.",
       "invalid_term": "Iherezo rya manda rigomba kuba nyuma y'intangiriro yayo.",
@@ -1553,7 +1555,9 @@
       "size_below_members": "Ingano ntishobora kujya munsi y'umubare w'abanyamuryango bari mu nshingano.",
       "size_not_allowed": "Iyi ngano ya komite ntiyemewe ({{allowed}}).",
       "period_overlap": "Manda nshya igomba gutangira nyuma y'iriho.",
-      "period_future": "Manda nshya ntishobora gutangira mu gihe kizaza."
+      "period_future": "Manda nshya ntishobora gutangira mu gihe kizaza.",
+      "name_taken": "Indi komite y'ikigo isanzwe yitwa “{{name}}”.",
+      "period_start_required": "Hitamo itariki manda nshya itangiriraho."
     },
     "composition": {
       "already_member": "Uyu muntu asanzwe ari muri iyi komite.",

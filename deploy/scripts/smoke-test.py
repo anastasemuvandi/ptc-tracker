@@ -136,7 +136,7 @@ for key, roles, po in [("cbm", ["CBM"], False), ("chair", [], False), ("vice", [
 
 cbm = onboard("cbm", people["cbm"][1])
 check("CBM had mandatory MFA enrolment", cbm.secret is not None)
-committee = cbm.call("POST", "/api/committees", {"name": "PTC A", "code": "PTCA", "size": 5})
+committee = cbm.call("POST", "/api/committees", {"name": "PTC A", "periodStart": date.today().isoformat()})
 cid = committee["id"]
 today = date.today().isoformat()
 r = cbm.call("POST", f"/api/committees/{cid}/members", {"userId": people["cbm"][0], "role": "MEMBER",

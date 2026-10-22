@@ -69,7 +69,7 @@ class RequestFlowTest extends IntegrationTest {
         UUID inst = TestActors.newInstitution("RQ");
         Actor admin = actors.login(actors.user(inst, Set.of(InstitutionRole.INSTITUTION_ADMIN), false, null));
         Actor cbm = actors.login(actors.user(inst, Set.of(InstitutionRole.CBM), false, null));
-        UUID committee = UUID.fromString(call(actors.post_(cbm, Map.of("name", "PTC A", "code", "PTCA", "size", 5),
+        UUID committee = UUID.fromString(call(actors.post_(cbm, Map.of("name", "PTC A", "periodStart", Time.today().toString()),
                 "/api/committees")).get("id").asText());
         Actor chair = actors.user(inst, Set.of(), false, null);
         Actor sec = actors.user(inst, Set.of(), true, null);

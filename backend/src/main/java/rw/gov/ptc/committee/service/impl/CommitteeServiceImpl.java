@@ -1,5 +1,6 @@
 package rw.gov.ptc.committee.service.impl;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,9 +34,11 @@ import rw.gov.ptc.config.dto.ConfigSnapshot;
 import rw.gov.ptc.config.service.ConfigService;
 import rw.gov.ptc.security.Access;
 
+import java.text.Normalizer;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -90,25 +93,21 @@ public class CommitteeServiceImpl implements CommitteeService {
     @Transactional
     public Committee create(CreateCommittee req) {
         access.requireCbm();
-        if (blank(req.name()) || blank(req.code()) || req.size() == null) {
-            throw ApiException.badRequest("committee.invalid", "Name, code and size are required");
+        if (blank(req.name()) || req.periodStart() == null) {
+            throw ApiException.badRequest("committee.invalid", "Name and start date are required");
         }
-        ConfigSnapshot cfg = config.snapshot();
-        checkSize(req.size(), cfg);
-        if (committees.countByStatus(CommitteeStatus.ACTIVE) >= 1 && (blank(req.regulatorAuthRef()) || req.regulatorAuthDate() == null)) {
-            throw ApiException.rule("committee.regulator_authorisation_required",
-                    "An additional committee requires the regulator's authorisation: record its reference and date");
+        String name = cleanName(req.name());
+        if (committees.existsByNameIgnoreCase(name)) {
+            throw nameTaken(name);
         }
         Committee c = new Committee();
-        c.name = req.name().trim();
-        c.code = req.code().trim().toUpperCase();
-        c.size = req.size();
-        c.regulatorAuthRef = req.regulatorAuthRef();
-        c.regulatorAuthDate = req.regulatorAuthDate();
+        c.name = name;
+        c.code = uniqueCode(name);
+        c.size = defaultSize(config.snapshot());
         c.createdBy = access.userId();
-        committees.saveAndFlush(c);
+        save(c);
         audit.created("committee", c.id, c);
-        openPeriod(c, req.periodStart(), req.appointmentRef());
+        openPeriod(c, req.periodStart(), null);
         return c;
     }
 
@@ -121,7 +120,13 @@ public class CommitteeServiceImpl implements CommitteeService {
             throw ApiException.conflict("concurrent_modification", "Reload and try again");
         }
         var before = audit.snapshot(c);
-        if (!blank(req.name())) c.name = req.name().trim();
+        if (!blank(req.name())) {
+            String name = cleanName(req.name());
+            if (committees.existsByNameIgnoreCaseAndIdNot(name, id)) {
+                throw nameTaken(name);
+            }
+            c.name = name;
+        }
         if (req.size() != null && req.size() != c.size) {
             checkSize(req.size(), config.snapshot());
             int active = memberships.findByCommitteeIdAndStatusOrderByRoleAsc(id, MembershipStatus.ACTIVE).size();
@@ -134,9 +139,59 @@ public class CommitteeServiceImpl implements CommitteeService {
         }
         if (req.regulatorAuthRef() != null) c.regulatorAuthRef = req.regulatorAuthRef();
         if (req.regulatorAuthDate() != null) c.regulatorAuthDate = req.regulatorAuthDate();
-        committees.saveAndFlush(c);
+        save(c);
         audit.updated("committee", c.id, before, c);
         return c;
+    }
+
+    private static String cleanName(String name) {
+        return name.trim().replaceAll("\\s+", " ");
+    }
+
+    private static ApiException nameTaken(String name) {
+        return new ApiException(org.springframework.http.HttpStatus.CONFLICT, "committee.name_taken",
+                "A committee named \"" + name + "\" already exists", Map.of("name", name));
+    }
+
+    /** The unique index also catches a name taken by a concurrent request. */
+    private void save(Committee c) {
+        try {
+            committees.saveAndFlush(c);
+        } catch (DataIntegrityViolationException e) {
+            if (String.valueOf(e.getMostSpecificCause().getMessage()).contains("uq_committee_name")) {
+                throw nameTaken(c.name);
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * Short code used in session numbers (PTCA 2026/014), derived from the
+     * name: the initials of three or more words, otherwise the words joined;
+     * a number is appended when another committee of the institution has it.
+     */
+    private String uniqueCode(String name) {
+        List<String> words = Arrays.stream(Normalizer.normalize(name, Normalizer.Form.NFD)
+                        .replaceAll("\\p{M}", "").toUpperCase().split("[^A-Z0-9]+"))
+                .filter(w -> !w.isEmpty()).toList();
+        String base = words.size() >= 3
+                ? String.join("", words.stream().map(w -> Character.isDigit(w.charAt(0)) ? w : w.substring(0, 1)).toList())
+                : String.join("", words);
+        base = base.isEmpty() ? "PTC" : base.substring(0, Math.min(base.length(), 10));
+        Set<String> taken = new HashSet<>();
+        committees.findAll().forEach(other -> taken.add(other.code));
+        String code = base;
+        for (int n = 2; taken.contains(code); n++) {
+            code = base + n;
+        }
+        return code;
+    }
+
+    /** New committees take the smallest standard size; the CBM does not choose it. */
+    private static int defaultSize(ConfigSnapshot cfg) {
+        List<Integer> allowed = new ArrayList<>();
+        cfg.get(ConfigKeys.COMMITTEE_ALLOWED_SIZES).forEach(n -> allowed.add(n.asInt()));
+        return allowed.stream().min(Integer::compare).orElse(cfg.getInt(ConfigKeys.COMMITTEE_MINIMUM_SIZE));
     }
 
     // --------------------------------------------------------------- periods
@@ -159,7 +214,10 @@ public class CommitteeServiceImpl implements CommitteeService {
         if (c.status != CommitteeStatus.ACTIVE) {
             throw ApiException.rule("committee.inactive", "The committee is dissolved");
         }
-        if (req.startsOn() != null && req.startsOn().isAfter(Time.today())) {
+        if (req.startsOn() == null) {
+            throw ApiException.badRequest("committee.period_start_required", "Choose the date the new period starts");
+        }
+        if (req.startsOn().isAfter(Time.today())) {
             throw ApiException.rule("committee.period_future", "Start the new period on or after its start date");
         }
         return openPeriod(c, req.startsOn(), req.appointmentRef());
@@ -172,8 +230,7 @@ public class CommitteeServiceImpl implements CommitteeService {
      * Secretary's (the procurement officer is a permanent member), which
      * continues into the new period. Past members may be appointed again.
      */
-    private CommitteePeriod openPeriod(Committee c, LocalDate startsOn, String appointmentRef) {
-        LocalDate start = startsOn == null ? Time.today() : startsOn;
+    private CommitteePeriod openPeriod(Committee c, LocalDate start, String appointmentRef) {
         Optional<CommitteePeriod> current = currentPeriod(c.id);
         if (current.isPresent()) {
             CommitteePeriod p = current.get();
@@ -249,7 +306,7 @@ public class CommitteeServiceImpl implements CommitteeService {
         }
         for (Appointment a : appointments) {
             validateAppointment(a);
-            LocalDate start = a.termStart() == null ? Time.today() : a.termStart();
+            LocalDate start = a.termStart() != null ? a.termStart() : defaultTermStart(committeeId);
             List<Membership> previous = memberships.findByCommitteeIdAndUserIdOrderByTermEndDesc(committeeId, a.userId());
             seats.add(new CompositionRules.Seat(a.userId(), a.role(), CompositionRules.consecutiveTerm(previous, start), true));
         }
@@ -291,7 +348,7 @@ public class CommitteeServiceImpl implements CommitteeService {
 
     private Membership newMembership(Committee c, Appointment a) {
         ConfigSnapshot cfg = config.snapshot();
-        LocalDate start = a.termStart() == null ? Time.today() : a.termStart();
+        LocalDate start = a.termStart() != null ? a.termStart() : defaultTermStart(c.id);
         LocalDate end = a.termEnd() != null ? a.termEnd() : defaultTermEnd(c.id, start, cfg);
         if (!end.isAfter(start)) {
             throw ApiException.badRequest("committee.invalid_term", "Term end must be after term start");
@@ -308,6 +365,12 @@ public class CommitteeServiceImpl implements CommitteeService {
         m.appointedBy = access.userId();
         memberships.saveAndFlush(m);
         return m;
+    }
+
+    /** Today, or the scheduled start of a committee period that has not begun yet. */
+    private LocalDate defaultTermStart(UUID committeeId) {
+        LocalDate today = Time.today();
+        return currentPeriod(committeeId).map(p -> p.startsOn).filter(s -> s.isAfter(today)).orElse(today);
     }
 
     /** A seat ends with the committee period it starts in; without one, after the configured term length. */

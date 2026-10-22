@@ -14,8 +14,10 @@ import rw.gov.ptc.auth.internal.TestActors.Actor;
 import rw.gov.ptc.auth.internal.TestActors;
 import rw.gov.ptc.common.Time;
 import rw.gov.ptc.support.IntegrationTest;
+import rw.gov.ptc.support.Owner;
 import rw.gov.ptc.support.TestBeans;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,7 +51,7 @@ class CommitteeCompositionTest extends IntegrationTest {
     }
 
     private UUID committee(String code, Map<String, Object> extra) throws Exception {
-        var body = new java.util.HashMap<String, Object>(Map.of("name", "Committee " + code, "code", code, "size", 5));
+        var body = new java.util.HashMap<String, Object>(Map.of("name", "Committee " + code, "periodStart", Time.today().toString()));
         body.putAll(extra);
         MvcResult r = mvc.perform(actors.post_(cbm, body, "/api/committees")).andExpect(status().isOk()).andReturn();
         return UUID.fromString(actors.body(r).get("id").asText());
@@ -61,14 +63,43 @@ class CommitteeCompositionTest extends IntegrationTest {
     }
 
     @Test
-    void sizeAndRegulatorAuthorisation() throws Exception {
-        mvc.perform(actors.post_(cbm, Map.of("name", "X", "code", "X", "size", 6), "/api/committees"))
-                .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.code").value("committee.size_not_allowed"));
-        committee("PTC-A", Map.of());
-        mvc.perform(actors.post_(cbm, Map.of("name", "B", "code", "PTC-B", "size", 7), "/api/committees"))
-                .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.code").value("committee.regulator_authorisation_required"));
-        committee("PTC-B", Map.of("size", 7, "regulatorAuthRef", "RPPA/123", "regulatorAuthDate", "2026-01-15"));
+    void cbmGivesAUniqueNameAndSchedulesTheStart() throws Exception {
+        mvc.perform(actors.post_(cbm, Map.of("name", "PTC A"), "/api/committees"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("committee.invalid"));
+
+        // The CBM only schedules the start; the end, code and size follow.
+        LocalDate start = Time.today().plusDays(10);
+        UUID a = committee("x", Map.of("name", "PTC A", "periodStart", start.toString()));
+        JsonNode detail = actors.body(mvc.perform(actors.get_(cbm, "/api/committees/{id}", a)).andReturn());
+        assertThat(detail.get("code").asText()).isEqualTo("PTCA");
+        assertThat(detail.get("size").asInt()).isEqualTo(5);
+        assertThat(detail.get("currentPeriod").get("startsOn").asText()).isEqualTo(start.toString());
+        assertThat(detail.get("currentPeriod").get("endsOn").asText()).isEqualTo(start.plusYears(3).minusDays(1).toString());
+
+        // Seats appointed before a scheduled start begin with the period.
+        Actor chair = actors.user(inst, Set.of(), false, null);
+        JsonNode seat = actors.body(appoint(a, chair, "CHAIRPERSON")).get("membership");
+        assertThat(seat.get("termStart").asText()).isEqualTo(start.toString());
+
+        // Unique in the institution, ignoring case and spacing, dissolved committees included.
+        mvc.perform(actors.post_(cbm, Map.of("name", "  ptc   a ", "periodStart", Time.today().toString()), "/api/committees"))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("committee.name_taken"));
+        Owner.jdbc().update("UPDATE committee SET status = 'DISSOLVED' WHERE id = ?", a);
+        mvc.perform(actors.post_(cbm, Map.of("name", "PTC A", "periodStart", Time.today().toString()), "/api/committees"))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("committee.name_taken"));
+
+        // A further committee needs no extra input; a code clash gets a number.
+        UUID b = committee("x", Map.of("name", "PTC-A"));
+        assertThat(actors.body(mvc.perform(actors.get_(cbm, "/api/committees/{id}", b)).andReturn()).get("code").asText())
+                .isEqualTo("PTCA2");
+        mvc.perform(actors.put_(cbm, Map.of("name", "PTC a"), "/api/committees/{id}", b))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("committee.name_taken"));
+
+        // Another institution may use the same name.
+        UUID other = TestActors.newInstitution("CO");
+        Actor otherCbm = actors.login(actors.user(other, Set.of(InstitutionRole.CBM), false, "CBM"));
+        mvc.perform(actors.post_(otherCbm, Map.of("name", "PTC A", "periodStart", Time.today().toString()), "/api/committees"))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -157,10 +188,9 @@ class CommitteeCompositionTest extends IntegrationTest {
         String today = Time.today().toString();
         String firstStart = Time.today().minusYears(2).toString();
         String firstEnd = Time.today().minusYears(2).plusMonths(36).minusDays(1).toString();
-        UUID c = committee("PTC-A", Map.of("periodStart", firstStart, "appointmentRef", "Decision 12/2024"));
+        UUID c = committee("PTC-A", Map.of("periodStart", firstStart));
         JsonNode first = actors.body(mvc.perform(actors.get_(cbm, "/api/committees/{id}", c)).andReturn()).get("currentPeriod");
         assertThat(first.get("endsOn").asText()).isEqualTo(firstEnd);
-        assertThat(first.get("appointmentRef").asText()).isEqualTo("Decision 12/2024");
 
         // Seats end with the period they start in.
         Actor chair = actors.user(inst, Set.of(), false, null);
@@ -193,6 +223,8 @@ class CommitteeCompositionTest extends IntegrationTest {
         // A member of the past committee may join the next one.
         assertThat(appoint(c, chair, "MEMBER").getResponse().getStatus()).isEqualTo(200);
 
+        mvc.perform(actors.post_(cbm, Map.of(), "/api/committees/{id}/periods", c))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("committee.period_start_required"));
         mvc.perform(actors.post_(cbm, Map.of("startsOn", Time.today().plusDays(5).toString()), "/api/committees/{id}/periods", c))
                 .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.code").value("committee.period_future"));
         mvc.perform(actors.post_(cbm, Map.of("startsOn", today), "/api/committees/{id}/periods", c))
@@ -204,7 +236,7 @@ class CommitteeCompositionTest extends IntegrationTest {
     @Test
     void onlyTheCbmConstitutesCommittees() throws Exception {
         Actor admin = actors.login(actors.user(inst, Set.of(InstitutionRole.INSTITUTION_ADMIN), false, null));
-        mvc.perform(actors.post_(admin, Map.of("name", "X", "code", "X", "size", 5), "/api/committees"))
+        mvc.perform(actors.post_(admin, Map.of("name", "X", "periodStart", Time.today().toString()), "/api/committees"))
                 .andExpect(status().isForbidden());
     }
 }

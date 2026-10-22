@@ -478,7 +478,7 @@
     "code": "Code",
     "consecutiveTerm": "Consecutive term",
     "create": "Create committee",
-    "createHelp": "Members are appointed after the committee is created.",
+    "createHelp": "Give the committee a name and schedule the start of its period. The period lasts {{months}} months and its end date is set automatically. Members are appointed after the committee is created.",
     "created": "Committee created",
     "decline": "Decline",
     "endMembership": "End membership",
@@ -552,7 +552,9 @@
     "noPeriod": "No period recorded",
     "periodLapsed": "Period ended",
     "periodEndsIn_one": "Ends in {{count}} day",
-    "periodEndsIn_other": "Ends in {{count}} days"
+    "periodEndsIn_other": "Ends in {{count}} days",
+    "nameUniqueHint": "Must be different from the name of any other committee of the institution, including dissolved ones.",
+    "periodEndsOn": "Ends automatically on {{date}} ({{months}} months)."
   },
   "composition": {
     "blocked": "Blocked",
@@ -1537,7 +1539,7 @@
     "committee": {
       "chair_required": "Only the Chairperson (or Vice-Chairperson) may do this.",
       "inactive": "This committee is not active.",
-      "invalid": "Name, code and size are required.",
+      "invalid": "Give the committee a name and a start date.",
       "invalid_appointment": "The appointment is incomplete.",
       "invalid_renewal": "This membership cannot be renewed.",
       "invalid_term": "The term end must be after its start.",
@@ -1553,7 +1555,9 @@
       "size_below_members": "The size cannot be below the number of active members.",
       "size_not_allowed": "This committee size is not allowed ({{allowed}}).",
       "period_overlap": "A new period must start after the current one.",
-      "period_future": "A new period cannot start in the future."
+      "period_future": "A new period cannot start in the future.",
+      "name_taken": "Another committee of the institution is already named “{{name}}”.",
+      "period_start_required": "Choose the date the new period starts."
     },
     "composition": {
       "already_member": "This person already sits on this committee.",

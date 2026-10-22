@@ -94,9 +94,9 @@ The CBM constitutes committees and decides on their recommendations, but is neve
 
 ### Creating a committee
 
-Under **Committees**, create a committee and give its name (e.g. "PTC A"), a short code and its size (5 or 7 by default). Each committee has its own size and therefore its own quorum. If your institution already has an active committee, you must also record the regulator's **authorisation reference and date**, because additional committees need authorisation.
+Under **Committees**, create a committee by giving its **name** (e.g. "PTC A") and the **date its period starts**. The name must differ from that of every other committee of your institution, including dissolved ones. The start may be today, in the past or in the future; the period lasts 3 years and its end date is set automatically (the form shows it). Members you appoint before a scheduled start begin their term on that date. The short code used in session numbers (e.g. "PTCA 2026/014") is derived from the name.
 
-A committee is appointed for a **period** of three years (configurable). Give the period start and the appointment reference when you create the committee; the end date is filled in automatically. The committee keeps its name across periods: when it is appointed again, choose *New period* on the committee page, and the period history is kept under *Periods*. Replacing all members also starts a new period. A badge warns when the period is about to end or has ended.
+A committee is appointed for a **period** of three years (configurable). The committee keeps its name across periods: when it is appointed again, choose *New period* on the committee page, and the period history is kept under *Periods*. Replacing all members also starts a new period. A badge warns when the period is about to end or has ended.
 
 Members' terms end with the period they are appointed in. When a new period starts, members' seats end, except the Secretary's: the procurement officer is a permanent member and continues automatically. Anyone from the past committee may be appointed again; going beyond the configured number of renewals shows a warning but does not block (an institution can make it blocking in Settings).
 

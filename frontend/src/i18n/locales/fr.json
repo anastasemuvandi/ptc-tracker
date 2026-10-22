@@ -478,7 +478,7 @@
     "code": "Code",
     "consecutiveTerm": "Mandat consécutif",
     "create": "Créer un comité",
-    "createHelp": "Les membres sont nommés après la création du comité.",
+    "createHelp": "Donnez un nom au comité et fixez le début de sa période. La période dure {{months}} mois et sa date de fin est fixée automatiquement. Les membres sont nommés après la création du comité.",
     "created": "Comité créé",
     "decline": "Refuser",
     "endMembership": "Mettre fin au mandat",
@@ -552,7 +552,9 @@
     "noPeriod": "Aucune période enregistrée",
     "periodLapsed": "Période échue",
     "periodEndsIn_one": "Se termine dans {{count}} jour",
-    "periodEndsIn_other": "Se termine dans {{count}} jours"
+    "periodEndsIn_other": "Se termine dans {{count}} jours",
+    "nameUniqueHint": "Doit être différent du nom de tout autre comité de l'institution, y compris les comités dissous.",
+    "periodEndsOn": "Se termine automatiquement le {{date}} ({{months}} mois)."
   },
   "composition": {
     "blocked": "Bloquant",
@@ -1537,7 +1539,7 @@
     "committee": {
       "chair_required": "Seul le Président (ou le Vice-Président) peut faire cela.",
       "inactive": "Ce comité n'est pas actif.",
-      "invalid": "Le nom, le code et la taille sont obligatoires.",
+      "invalid": "Donnez un nom et une date de début au comité.",
       "invalid_appointment": "La nomination est incomplète.",
       "invalid_renewal": "Ce mandat ne peut pas être renouvelé.",
       "invalid_term": "La fin du mandat doit suivre son début.",
@@ -1553,7 +1555,9 @@
       "size_below_members": "La taille ne peut être inférieure au nombre de membres en fonction.",
       "size_not_allowed": "Cette taille de comité n'est pas autorisée ({{allowed}}).",
       "period_overlap": "Une nouvelle période doit commencer après la période en cours.",
-      "period_future": "Une nouvelle période ne peut pas commencer dans le futur."
+      "period_future": "Une nouvelle période ne peut pas commencer dans le futur.",
+      "name_taken": "Un autre comité de l'institution porte déjà le nom « {{name}} ».",
+      "period_start_required": "Choisissez la date de début de la nouvelle période."
     },
     "composition": {
       "already_member": "Cette personne siège déjà dans ce comité.",

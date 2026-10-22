@@ -12,4 +12,8 @@ public interface CommitteeRepository extends JpaRepository<Committee, UUID> {
     List<Committee> findAllByOrderByCodeAsc();
 
     long countByStatus(CommitteeStatus status);
+
+    boolean existsByNameIgnoreCase(String name);
+
+    boolean existsByNameIgnoreCaseAndIdNot(String name, UUID id);
 }

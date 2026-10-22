@@ -15,6 +15,7 @@ import rw.gov.ptc.auth.internal.TestActors.Actor;
 import rw.gov.ptc.auth.internal.TestActors;
 import rw.gov.ptc.decision.entity.Decision;
 import rw.gov.ptc.decision.repository.DecisionRepository;
+import rw.gov.ptc.common.Time;
 import rw.gov.ptc.support.IntegrationTest;
 import rw.gov.ptc.support.TestBeans;
 import rw.gov.ptc.tenancy.TenantContext;
@@ -71,7 +72,7 @@ class SessionDecisionFlowTest extends IntegrationTest {
         Actor cbm = actors.login(actors.user(inst, Set.of(InstitutionRole.CBM), false, null));
 
         // ---- constitution (before members sign in: appointment bumps tokens)
-        UUID committee = UUID.fromString(call(actors.post_(cbm, Map.of("name", "PTC A", "code", "PTCA", "size", 5),
+        UUID committee = UUID.fromString(call(actors.post_(cbm, Map.of("name", "PTC A", "periodStart", Time.today().toString()),
                 "/api/committees")).get("id").asText());
         Actor chair = actors.user(inst, Set.of(), false, null);
         Actor vice = actors.user(inst, Set.of(), false, null);
