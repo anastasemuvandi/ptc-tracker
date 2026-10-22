@@ -1249,7 +1249,9 @@
     "templatePresent": "Un modèle est utilisé.",
     "templateUploaded": "Modèle téléversé",
     "title": "Paramètres de l'institution",
-    "type": "Type d'institution"
+    "type": "Type d'institution",
+    "manageHolidays": "Gérer les jours fériés",
+    "saveToManageHolidays": "Enregistrez pour ajouter ou retirer des jours fériés pour votre institution."
   },
   "holidays": {
     "add": "Ajouter",

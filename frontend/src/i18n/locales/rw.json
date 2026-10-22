@@ -1249,7 +1249,9 @@
     "templatePresent": "Icyitegererezo kirakoreshwa.",
     "templateUploaded": "Icyitegererezo cyashyizweho",
     "title": "Igenamiterere ry'ikigo",
-    "type": "Ubwoko bw'ikigo"
+    "type": "Ubwoko bw'ikigo",
+    "manageHolidays": "Gucunga iminsi y'ikiruhuko",
+    "saveToManageHolidays": "Bika kugira ngo wongere cyangwa ukureho iminsi y'ikiruhuko y'ikigo cyawe."
   },
   "holidays": {
     "add": "Ongeraho",

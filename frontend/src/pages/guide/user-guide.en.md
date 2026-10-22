@@ -62,7 +62,7 @@ What you see in the menu depends on your role. You may hold different roles on d
 | Role | Main tasks | Two-step verification |
 | --- | --- | --- |
 | Platform administrator | Creates institutions and invites each one's first administrator; sees operational counts only, never file content | Mandatory |
-| Institution administrator | Invites users and sets their roles; institution settings, minutes template, rules and thresholds, holidays | Mandatory |
+| Institution administrator | Invites users and sets their roles; institution settings, minutes template, rules and thresholds, own holidays, audit log | Mandatory |
 | Chief Budget Manager (CBM) | Creates committees, appoints and replaces members, reassigns files and assigns their procurement officer, responds to recommendations. Never a committee member, never votes | Mandatory |
 | Chairperson / Vice-Chairperson | Register files, run sessions, decide tabling requests, open voting, issue recommendations | Mandatory |
 | Secretary (procurement officer) | Registers files, schedules sessions, keeps attendance, records evaluation progress, drafts minutes | Mandatory |
@@ -84,7 +84,7 @@ If an institution administrator loses both their authenticator and their recover
 - **Requesters (onboarding and offboarding):** an employee who needs to bring a request to the committee is invited like any user, with the role *Requester*. Choose **short term**, with the date access ends, or **long term**. The invitation email lets them set a password; their username is their email. Short-term access ends automatically after its last day; to offboard anyone earlier, disable the account. Use *Manage* to change the category or extend the end date.
 - **Institution:** name, letterhead text and the font family and size used in minutes. Upload your own **minutes template** (.docx, under 5 MB): its headers, footers and styles are kept and the minutes are written into its body.
 - **Rules & thresholds:** every legal threshold, period and rule is a setting, not fixed in the software: committee sizes, quorum and voting fractions, notice periods, cure period, amendment ceilings, term length and so on. Each change needs an **effective date**, a reason and, ideally, the legal reference (for example the Ministerial Order article). Changes cannot be backdated, and the full history is kept. Past decisions are always shown with the rules that applied when they were taken.
-- **Holidays:** the national public holiday calendar is shared by all institutions. Islamic holidays are entered as provisional and should be confirmed when government announces them. If your institution observes a different calendar, switch on *holiday override* in Institution settings and add or remove days here. Working-day deadlines (cure period, notice period, target dates) use this calendar.
+- **Holidays:** the national public holiday calendar is shared by all institutions. Islamic holidays are entered as provisional and should be confirmed when government announces them. If your institution observes a different calendar, switch on *holiday override* under **Institution**, save, and choose **Manage holidays** there to add or remove days. Working-day deadlines (cure period, notice period, target dates) use this calendar.
 
 ![Rules and thresholds: each rule shows its value, whether it is the platform default or your institution's, and its effective date](/guide/11-rules.png)
 

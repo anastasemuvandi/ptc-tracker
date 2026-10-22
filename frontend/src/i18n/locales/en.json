@@ -1249,7 +1249,9 @@
     "templatePresent": "A template is in use.",
     "templateUploaded": "Template uploaded",
     "title": "Institution settings",
-    "type": "Institution type"
+    "type": "Institution type",
+    "manageHolidays": "Manage holidays",
+    "saveToManageHolidays": "Save to add or remove holidays for your institution."
   },
   "holidays": {
     "add": "Add",

@@ -1,5 +1,7 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { CalendarDays } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { institution } from '@/api/endpoints';
 import type { Institution } from '@/api/types';
@@ -56,9 +58,17 @@ function InstitutionForm({ inst }: { inst: Institution }) {
       </Card>
       <Card>
         <CardHeader><CardTitle>{t('institution.calendar')}</CardTitle></CardHeader>
-        <CardContent className="flex items-start gap-2">
-          <Checkbox id="in-hol" checked={f.holidayOverride} onCheckedChange={(c) => setF({ ...f, holidayOverride: c === true })} />
-          <Label htmlFor="in-hol" className="leading-snug">{t('institution.holidayOverride')}</Label>
+        <CardContent className="grid gap-3">
+          <div className="flex items-start gap-2">
+            <Checkbox id="in-hol" checked={f.holidayOverride} onCheckedChange={(c) => setF({ ...f, holidayOverride: c === true })} />
+            <Label htmlFor="in-hol" className="leading-snug">{t('institution.holidayOverride')}</Label>
+          </div>
+          {/* Holidays has no menu entry for administrators: reached from here once the override is saved. */}
+          {inst.holidayOverride ? (
+            <Button asChild variant="outline" className="justify-self-start">
+              <Link to="/admin/holidays"><CalendarDays className="h-4 w-4" aria-hidden />{t('institution.manageHolidays')}</Link>
+            </Button>
+          ) : f.holidayOverride && <p className="text-sm text-muted-foreground">{t('institution.saveToManageHolidays')}</p>}
         </CardContent>
       </Card>
       <Button className="justify-self-start" disabled={save.isPending} onClick={() => save.mutate(undefined)}>{t('common.save')}</Button>
