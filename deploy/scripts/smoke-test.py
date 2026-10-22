@@ -90,13 +90,18 @@ def invite_link(email):
     logs = subprocess.run(["docker", "compose", "logs", "--no-log-prefix", "backend"], cwd=DEPLOY,
                           capture_output=True, text=True).stdout
     idx = logs.rfind("to=" + email)
-    assert idx >= 0, "no invitation mail logged for " + email
-    return re.search(r"accept-invite\?token=([A-Za-z0-9_-]+)", logs[idx:]).group(1)
+    match = re.search(r"accept-invite\?token=([A-Za-z0-9_-]+)", logs[idx:]) if idx >= 0 else None
+    return match.group(1) if match else None
 
 
-def onboard(name, email):
+def onboard(name, email, existing_ok=False):
+    """Accepts the logged invitation and signs in. With existing_ok, an account
+    already onboarded by an earlier run (no invitation in this log) just signs in."""
     c = Client(name)
-    c.call("POST", "/api/auth/invitations/accept", {"token": invite_link(email), "password": PASSWORD})
+    token = invite_link(email)
+    assert token or existing_ok, "no invitation mail logged for " + email
+    if token:
+        c.call("POST", "/api/auth/invitations/accept", {"token": token, "password": PASSWORD})
     res = c.call("POST", "/api/auth/login", {"email": email, "password": PASSWORD})
     if res["status"] == "MFA_ENROLMENT_REQUIRED":
         enrol = c.call("POST", "/api/auth/mfa/enrol/start", {"challenge": res["challenge"]})
@@ -117,7 +122,7 @@ def check(label, cond):
 print(f"Smoke test against {BASE} (run {RUN})")
 
 # Platform administrator: bootstrap invitation from the log.
-pa = onboard("platform-admin", "platform.admin@example.rw")
+pa = onboard("platform-admin", "platform.admin@example.rw", existing_ok=True)
 inst = pa.call("POST", "/api/platform/institutions", {
     "name": f"Smoke Ministry {RUN}", "abbreviation": f"SM{RUN}".upper(), "institutionType": "MINISTRY",
     "supervisingAuthority": "MINECOFIN", "adminEmail": f"admin.{RUN}@example.rw", "adminFullName": "Inst Admin"})
