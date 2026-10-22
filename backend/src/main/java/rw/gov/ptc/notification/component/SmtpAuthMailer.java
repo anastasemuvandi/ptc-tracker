@@ -13,11 +13,11 @@ public class SmtpAuthMailer implements AuthMailer {
 
     private static final Map<String, String[]> INVITE = Map.of(
             "en", new String[]{"You are invited to PTC Tracker",
-                    "Hello %s,\n\nYou have been invited to PTC Tracker, the tender committee progress tracker of your institution.\n\nSet your password here (the link is valid for 72 hours and can be used once):\n%s\n"},
+                    "Hello %s,\n\nYou have been invited to PTC Tracker, the tender committee progress tracker of your institution.\n\nYour username is this email address: %s\n\nSet your password here (the link is valid for 72 hours and can be used once):\n%s\n"},
             "fr", new String[]{"Invitation à PTC Tracker",
-                    "Bonjour %s,\n\nVous êtes invité(e) à PTC Tracker, l'outil de suivi du comité des marchés publics de votre institution.\n\nDéfinissez votre mot de passe ici (lien valable 72 heures, utilisable une seule fois) :\n%s\n"},
+                    "Bonjour %s,\n\nVous êtes invité(e) à PTC Tracker, l'outil de suivi du comité des marchés publics de votre institution.\n\nVotre nom d'utilisateur est cette adresse e-mail : %s\n\nDéfinissez votre mot de passe ici (lien valable 72 heures, utilisable une seule fois) :\n%s\n"},
             "rw", new String[]{"Mutumiwe muri PTC Tracker",
-                    "Muraho %s,\n\nMutumiwe gukoresha PTC Tracker, uburyo bwo gukurikirana imirimo ya komite y'amasoko ya Leta y'ikigo cyanyu.\n\nShyiraho ijambobanga ryanyu hano (iyi link imara amasaha 72 kandi ikoreshwa rimwe):\n%s\n"});
+                    "Muraho %s,\n\nMutumiwe gukoresha PTC Tracker, uburyo bwo gukurikirana imirimo ya komite y'amasoko ya Leta y'ikigo cyanyu.\n\nIzina ryo kwinjira ni iyi imeri: %s\n\nShyiraho ijambobanga ryanyu hano (iyi link imara amasaha 72 kandi ikoreshwa rimwe):\n%s\n"});
 
     private static final Map<String, String[]> RESET = Map.of(
             "en", new String[]{"Reset your PTC Tracker password",
@@ -36,7 +36,7 @@ public class SmtpAuthMailer implements AuthMailer {
     @Override
     public void sendInvitation(UUID userId, String email, String fullName, String locale, String link) {
         String[] t = INVITE.getOrDefault(locale, INVITE.get("en"));
-        mail.send(email, t[0], t[1].formatted(fullName, link));
+        mail.send(email, t[0], t[1].formatted(fullName, email, link));
     }
 
     @Override
