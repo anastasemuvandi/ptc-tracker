@@ -16,11 +16,12 @@ type Row = Record<string, unknown>;
 /** Member dashboard: my files, my sessions, my pending declarations and votes, my attendance. */
 export function HomePage() {
   const { t, i18n } = useTranslation();
-  const { me, hasRole } = useSession();
+  const { me, hasRole, isAdminOnly } = useSession();
   // A requester outside the committee sees only their requests' progress.
   const requesterOnly = hasRole('REQUESTER') && !me?.committees.length && !hasRole('CBM', 'INSTITUTION_ADMIN', 'READ_ONLY');
-  const q = useQuery({ queryKey: ['dashboard', 'member'], queryFn: dashboards.member, enabled: !hasRole('PLATFORM_ADMIN') && !requesterOnly });
+  const q = useQuery({ queryKey: ['dashboard', 'member'], queryFn: dashboards.member, enabled: !hasRole('PLATFORM_ADMIN') && !requesterOnly && !isAdminOnly });
   if (hasRole('PLATFORM_ADMIN')) return <Navigate to="/platform" replace />;
+  if (isAdminOnly) return <Navigate to="/admin/users" replace />;
   if (requesterOnly) {
     return (
       <div className="grid gap-4">

@@ -21,7 +21,7 @@ interface NavItem {
 
 function useNav(): NavItem[] {
   const { t } = useTranslation();
-  const { me, hasRole, isOfficerAnywhere } = useSession();
+  const { me, hasRole, isOfficerAnywhere, isAdminOnly } = useSession();
   const items: NavItem[] = [];
   if (!me) return items;
   if (hasRole('PLATFORM_ADMIN')) {
@@ -31,9 +31,11 @@ function useNav(): NavItem[] {
     items.push({ to: '/guide', label: t('nav.guide'), icon: BookOpen });
     return items;
   }
-  items.push({ to: '/', label: t('nav.home'), icon: LayoutDashboard });
+  // The institution administrator's own pages are Users, Institution,
+  // Rules & thresholds and the Audit log; other roles the same person holds add theirs.
+  if (!isAdminOnly) items.push({ to: '/', label: t('nav.home'), icon: LayoutDashboard });
   const inCommittee = me.committees.length > 0;
-  const readsAll = hasRole('CBM', 'INSTITUTION_ADMIN', 'READ_ONLY');
+  const readsAll = hasRole('CBM', 'READ_ONLY');
   if (inCommittee || readsAll) {
     items.push({ to: '/sessions', label: t('nav.sessions'), icon: CalendarDays });
     items.push({ to: '/files', label: t('nav.files'), icon: FileStack });
@@ -49,7 +51,7 @@ function useNav(): NavItem[] {
   if (isOfficerAnywhere) {
     items.push({ to: '/dashboard/chair', label: t('nav.chairDashboard'), icon: Gauge });
   }
-  if (hasRole('CBM') || isOfficerAnywhere || hasRole('INSTITUTION_ADMIN')) {
+  if (hasRole('CBM') || isOfficerAnywhere) {
     items.push({ to: '/tasks', label: t('nav.tasks'), icon: ListChecks });
   }
   if (readsAll || isOfficerAnywhere) items.push({ to: '/reports', label: t('nav.reports'), icon: BarChart3 });
@@ -57,7 +59,6 @@ function useNav(): NavItem[] {
     items.push({ to: '/admin/users', label: t('nav.users'), icon: Users });
     items.push({ to: '/admin/institution', label: t('nav.institution'), icon: Building2 });
     items.push({ to: '/admin/config', label: t('nav.config'), icon: SlidersHorizontal });
-    items.push({ to: '/admin/holidays', label: t('nav.holidays'), icon: CalendarDays });
   }
   if (hasRole('READ_ONLY', 'INSTITUTION_ADMIN', 'CBM')) items.push({ to: '/audit', label: t('nav.audit'), icon: ScrollText });
   items.push({ to: '/guide', label: t('nav.guide'), icon: BookOpen });

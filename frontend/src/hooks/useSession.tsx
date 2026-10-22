@@ -16,6 +16,8 @@ interface SessionValue {
   hasRole: (...roles: InstitutionRole[]) => boolean;
   committeeRole: (committeeId: string) => CommitteeRole | null;
   isOfficerAnywhere: boolean;
+  /** Institution administrator holding no other role or committee seat: sees only the administration pages. */
+  isAdminOnly: boolean;
 }
 
 const SessionContext = React.createContext<SessionValue | null>(null);
@@ -85,6 +87,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     hasRole: (...roles) => !!me && roles.some((r) => me.roles.includes(r)),
     committeeRole: (id) => me?.committees.find((c) => c.committeeId === id)?.role ?? null,
     isOfficerAnywhere: !!me?.committees.some((c) => c.role !== 'MEMBER'),
+    isAdminOnly: !!me && me.roles.length > 0 && me.roles.every((r) => r === 'INSTITUTION_ADMIN') && me.committees.length === 0,
   }), [status, me, loadMe]);
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
